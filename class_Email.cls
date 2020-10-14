@@ -8,14 +8,22 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Attribute VB_Description = "Static class that allows sending multiple emails without having to create an Outlook.Application each time."
+'@ModuleDescription "Static class that allows sending multiple emails without having to create an Outlook.Application each time."
+'@PredeclaredId
 Option Explicit
 
-private mMailApp As Object
+Private mMailApp As Object
+Private Const APP_NAME As String = "Outlook.Application"
 
-Public Sub GenerateEmail(ByVal ToRecipient As String, ByVal EmailSubject As String, ByVal EmailBody As String, _
-                              Optional AutoSend As Boolean, Optional CCRecipient As String, Optional BCCRecipient As String)
-    Attribute GenerateEmail.VB_Description = "Sends an email from outlook."
-    If mMailApp is Nothing Then Set mMailApp = CreateObject("Outlook.Application")
+Public Sub GenerateEmail( _
+    ByVal ToRecipient As String, _
+    ByVal EmailSubject As String, _
+    ByVal EmailBody As String, _
+    Optional ByVal AutoSend As Boolean, _
+    Optional ByVal CCRecipient As String, _
+    Optional ByVal BCCRecipient As String _
+)
+    If mMailApp Is Nothing Then Set mMailApp = CreateObject(APP_NAME)
     With mMailApp
         Dim OutMail As Object: Set OutMail = .CreateItem(0)
         With OutMail
@@ -34,5 +42,25 @@ Public Sub GenerateEmail(ByVal ToRecipient As String, ByVal EmailSubject As Stri
 End Sub
 
 Public Sub Destroy()
-    Set mMailApp = Nothing
+    On Error GoTo ErrorHandler
+    If Not mMailApp Is Nothing Then
+        mMailApp.Quit
+        Set mMailApp = Nothing
+    End If
+
+    Exit Sub
+ErrorHandler:
+    If Err.Number > 0 Then
+        Debug.Print _
+            "Error Disposing of " & APP_NAME; ":" & vbCrLf _
+            & Err.Description
+        Err.Clear
+        Resume Next
+    End If
 End Sub
+
+Private Sub Class_Terminate()
+    Destroy
+End Sub
+
+
