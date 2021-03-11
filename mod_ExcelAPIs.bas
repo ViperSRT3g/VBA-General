@@ -3,7 +3,7 @@ Option Explicit
 
 'Returns the row number of the currently selected cell
 Public Function ActiveRow() As Long
-    ActiveRow = Application.ActiveCell.row
+    ActiveRow = Application.ActiveCell.Row
 End Function
 
 'Returns the column number of the currently selected cell
@@ -13,12 +13,37 @@ End Function
 
 'Returns the last row of the specified worksheet number
 Public Function GetLastRow(ByRef TargetWorksheet As Worksheet, ByVal ColumnNo As Variant) As Long
-    GetLastRow = TargetWorksheet.Cells(TargetWorksheet.Rows.Count, ColumnNo).End(xlUp).row
+    GetLastRow = TargetWorksheet.Cells(TargetWorksheet.Rows.Count, ColumnNo).End(xlUp).Row
 End Function
 
 'Returns the last column of the specified worksheet number
 Public Function GetLastCol(ByRef TargetWorksheet As Worksheet, ByVal RowNo As Variant) As Long
     GetLastCol = TargetWorksheet.Cells(RowNo, TargetWorksheet.Columns.Count).End(xlToLeft).Column
+End Function
+
+'Returns the Column number of the specified header string, from the specified row of the given worksheet
+Public Function GetHeader(ByRef TargetWorksheet As Worksheet, ByVal HeaderRow As Long, ByVal HeaderStr As String) As Long
+    Dim Header As Range: Set Header = TargetWorksheet.Rows(HeaderRow).Find(HeaderStr, LookAt:=xlWhole)
+    If Not Header Is Nothing Then
+        GetHeader = Header.Column
+        Set Header = Nothing
+    End If
+End Function
+
+'Returns a Dictionary of all headers in a given row of a given worksheet with their associated column numbers
+'Used in conjunction with the GetHeader function
+Public Function GetHeaders(ByRef TargetWorksheet As Worksheet, ByVal HeaderRow As Long, Optional CaseSensitive As Boolean) As Object
+    Dim Output As Object: Set Output = CreateObject("Scripting.Dictionary")
+    Dim ColCounter As Long
+    For ColCounter = 1 To GetLastCol(TargetWorksheet, HeaderRow)
+        If CaseSensitive Then 'Headers are untouched
+            Output(CStr(TargetWorksheet.Cells(HeaderRow, ColCounter).Value)) = ColCounter
+        Else 'Headers are all Uppercase
+            Output(UCase(CStr(TargetWorksheet.Cells(HeaderRow, ColCounter).Value))) = ColCounter
+        End If
+    Next ColCounter
+    Set GetHeaders = Output
+    Set Output = Nothing
 End Function
 
 'Returns an expanded range of contiguous cells in the given direction from the target range
