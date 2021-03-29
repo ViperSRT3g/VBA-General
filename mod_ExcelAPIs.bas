@@ -1,6 +1,9 @@
 Attribute VB_Name = "mod_ExcelAPIs"
 Option Explicit
 
+'Updates for this module can be found here:
+'https://github.com/ViperSRT3g/General-VBA/blob/main/mod_ExcelAPIs.bas
+
 'Returns the row number of the currently selected cell
 Public Function ActiveRow() As Long
     ActiveRow = Application.ActiveCell.Row
