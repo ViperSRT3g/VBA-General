@@ -104,23 +104,16 @@ Public Function ShapeExists(ByVal Name As String, Optional ByRef TargetWorksheet
     ShapeExists = Not TargetWorksheet.Shapes(Name) Is Nothing
 End Function
 
+'Returns a worksheet with the given name, creates a new one if it doesn't already exist
 Public Function GetSheet(ByVal SheetName As String, Optional ByRef WB As Workbook) As Worksheet
+    On Error Resume Next
     If Len(SheetName) = 0 Then Exit Function
-    If Not IsMissing(WB) Then
-        If SheetExists(SheetName, WB) Then
-            Set GetSheet = WB.Worksheets(SheetName)
-        Else
-            Set GetSheet = WB.Worksheets.Add(After:=WB.Worksheets(WB.Worksheets.Count))
-        End If
-    Else
-        If SheetExists(SheetName) Then
-            Set GetSheet = Worksheets(SheetName)
-        Else
-            Set GetSheet = Worksheets.Add(After:=Worksheets(Worksheets.Count))
-        End If
+    If WB Is Nothing Then Set WB = ThisWorkbook
+    Set GetSheet = WB.Worksheets(SheetName)
+    If GetSheet Is Nothing Then
+        Set GetSheet = WB.Worksheets.Add(After:=WB.Worksheets(WB.Worksheets.Count))
+        GetSheet.Name = SheetName
     End If
-    
-    GetSheet.Name = SheetName
 End Function
 
 'Returns boolean if a given worksheet exists in a given workbook
