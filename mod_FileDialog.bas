@@ -13,19 +13,21 @@ Public Function FileDialog(ByVal DialogType As MsoFileDialogType, _
         If Len(DialogTitle) > 0 Then .Title = DialogTitle
         If Len(Initial) > 0 Then .InitialFileName = Initial & "\"
         .AllowMultiSelect = MultiSelect
-        .Filters.Clear
-        If Not IsMissing(Filter) Then
-            If (VarType(Filter) And vbArray) = vbArray Then 'An array was passed
-                For Index = LBound(Filter) To UBound(Filter)
-                    If InStr(Filter(Index), ",") Then 'Verify supplied filter is parse-able
-                        SubFilter = Split(Filter(Index), ",")
+        If DialogType = msoFileDialogFilePicker Or DialogType = msoFileDialogOpen Then
+            If Not IsMissing(Filter) Then
+                .Filters.Clear
+                If (VarType(Filter) And vbArray) = vbArray Then 'An array was passed
+                    For Index = LBound(Filter) To UBound(Filter)
+                        If InStr(Filter(Index), ",") Then 'Verify supplied filter is parse-able
+                            SubFilter = Split(Filter(Index), ",")
+                            .Filters.Add Trim(SubFilter(0)), Trim(SubFilter(1)) 'If you didn't supply the Filters properly, then this is your fault
+                        End If
+                    Next Index
+                ElseIf (VarType(Filter) And vbString) = vbString Then 'A single string was passed
+                    If InStr(Filter, ",") Then
+                        SubFilter = Split(Filter, ",")
                         .Filters.Add Trim(SubFilter(0)), Trim(SubFilter(1)) 'If you didn't supply the Filters properly, then this is your fault
                     End If
-                Next Index
-            ElseIf (VarType(Filter) And vbString) = vbString Then 'A single string was passed
-                If InStr(Filter, ",") Then
-                    SubFilter = Split(Filter, ",")
-                    .Filters.Add Trim(SubFilter(0)), Trim(SubFilter(1)) 'If you didn't supply the Filters properly, then this is your fault
                 End If
             End If
         End If
