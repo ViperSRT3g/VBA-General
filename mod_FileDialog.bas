@@ -3,19 +3,41 @@ Option Explicit
 
 Public Function FileDialog(ByVal DialogType As MsoFileDialogType, _
                            Optional ByVal DialogTitle As String, _
-                           Optional MultiSelect As Boolean, _
-                           Optional Initial As String) As String
-    'If MultiSelect then outputs files in the following format: "File1;File2;File3"
-    Dim SelectedFile As Variant
+                           Optional ByVal MultiSelect As Boolean, _
+                           Optional ByVal Initial As String, _
+                           Optional ByRef Filter As Variant) As String()
+    'FileDialog returns an array of strings based on user selection
+    'Filter Example: "Images, *.gif; *.jpg; *.jpeg"
+    Dim Index As Long, SubFilter() As String, Output() As String
     With Application.FileDialog(DialogType)
         If Len(DialogTitle) > 0 Then .Title = DialogTitle
         If Len(Initial) > 0 Then .InitialFileName = Initial & "\"
         .AllowMultiSelect = MultiSelect
         .Filters.Clear
+        If Not IsMissing(Filter) Then
+            If (VarType(Filter) And vbArray) = vbArray Then 'An array was passed
+                For Index = LBound(Filter) To UBound(Filter)
+                    If InStr(Filter(Index), ",") Then 'Verify supplied filter is parse-able
+                        SubFilter = Split(Filter(Index), ",")
+                        .Filters.Add Trim(SubFilter(0)), Trim(SubFilter(1)) 'If you didn't supply the Filters properly, then this is your fault
+                    End If
+                Next Index
+            ElseIf (VarType(Filter) And vbString) = vbString Then 'A single string was passed
+                If InStr(Filter, ",") Then
+                    SubFilter = Split(Filter, ",")
+                    .Filters.Add Trim(SubFilter(0)), Trim(SubFilter(1)) 'If you didn't supply the Filters properly, then this is your fault
+                End If
+            End If
+        End If
         .Show
-        For Each SelectedFile In .SelectedItems
-            FileDialog = FileDialog & CStr(SelectedFile) & ";"
-        Next SelectedFile
-        If Len(FileDialog) > 0 Then FileDialog = Left(FileDialog, Len(FileDialog) - 1)
+        'Process file selection (Whether there was a file selected or not)
+        Select Case .SelectedItems.Count
+            Case 0: ReDim Output(0) As String
+            Case Else: ReDim Output(.SelectedItems.Count - 1) As String
+        End Select
+        For Index = 0 To .SelectedItems.Count - 1
+            Output(Index) = .SelectedItems(Index + 1)
+        Next Index
+        FileDialog = Output
     End With
 End Function
