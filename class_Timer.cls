@@ -34,7 +34,7 @@ End Sub
 
 Public Sub UnPause()
     If Paused Then
-        PausedTime = Abs(GetTickCount - Previous)
+        PausedTime = PausedTime + Abs(GetTickCount - Previous)
         Paused = False
     End If
 End Sub
