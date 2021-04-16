@@ -44,7 +44,7 @@ Public Function StopTimer() As Date
     'including the amount of time this timer may have been paused!
     'Calling this function more than once yields the current elapsed time
     'since the timer began! This can be used as an interval recording function!
-    StopTimer = Abs(StartTime - Now() - Ticks2Time(PausedTime))
+    StopTimer = Abs((Now() - StartTime) - Ticks2Time(PausedTime))
 End Function
 
 Private Function Ticks2Time(ByVal Ticks As Long) As Date
