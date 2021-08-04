@@ -99,7 +99,7 @@ Public Function CopyFile(ByVal FilePath As String, ByVal FileDestination As Stri
         If .FileExists(FilePath) Then
             Dim FileObject As Object: Set FileObject = .GetFile(FilePath)
             FileObject.Copy (FileDestination)
-            CopyFile = FileExists(FileDestination)
+            CopyFile = .FileExists(FileDestination)
             Set FileObject = Nothing
         End If
     End With
@@ -162,6 +162,13 @@ Public Function FiletoArray(ByVal FilePath As String) As Byte()
     ReDim FiletoArray(FileLen(FilePath)) As Byte
     Dim FileNo As Integer: FileNo = FreeFile
     Open FilePath For Binary Access Read As FileNo: Get FileNo, , FiletoArray: Close FileNo
+End Function
+
+Public Function ArrayToFile(ByVal FilePath As String, ByRef Data() As Byte) As Boolean
+    If Len(FilePath) = 0 Then Exit Function
+    Dim FileNo As Integer: FileNo = FreeFile
+    Open FilePath For Binary Lock Read Write As FileNo: Put FileNo, , Data: Close FileNo
+    With CreateObject("Scripting.FileSystemObject"): ArrayToFile = .FileExists(FilePath): End With
 End Function
 
 Public Sub SubFolderLoop(ByVal TargetFolder As String)
