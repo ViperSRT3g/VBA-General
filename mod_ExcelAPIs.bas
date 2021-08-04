@@ -82,7 +82,7 @@ End Function
 Public Function AddPicture(ByRef TargetSheet As Worksheet, ByVal Path As String, ByVal Left As Single, ByVal Top As Single, _
                              Width As Single, ByVal Height As Single, Optional ByVal ShapeName As String) As Shape
     Set AddPicture = TargetSheet.Shapes.AddPicture(Path, msoFalse, msoTrue, Left, Top, Width, Height)
-    AddPicture.Name = ShapeName
+    If Len(ShapeName) > 0 Then AddPicture.Name = ShapeName
 End Function
 
 'Returns a boolean if a given CheckBox exists with a given name in a given worksheet
