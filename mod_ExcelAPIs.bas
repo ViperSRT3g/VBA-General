@@ -24,6 +24,12 @@ Public Function GetLastCol(ByRef TargetWorksheet As Worksheet, ByVal RowNo As Va
     GetLastCol = TargetWorksheet.Cells(RowNo, TargetWorksheet.Columns.Count).End(xlToLeft).Column
 End Function
 
+'Adds a given header to the specified worksheet row, and returns the column number the header occupies
+Public Function AddHeader(ByRef TargetWorksheet As Worksheet, ByVal RowNo As Variant, ByVal HeaderName As String) As Long
+    TargetWorksheet.Cells(RowNo, TargetWorksheet.Cells(RowNo, TargetWorksheet.Columns.Count).End(xlToLeft).Column + 1).Value = HeaderName
+    AddHeader = TargetWorksheet.Cells(RowNo, TargetWorksheet.Columns.Count).End(xlToLeft).Column
+End Function
+
 'Returns the Column number of the specified header string, from the specified row of the given worksheet
 Public Function GetHeader(ByRef TargetWorksheet As Worksheet, ByVal HeaderRow As Long, ByVal HeaderStr As String) As Long
     Dim Header As Range: Set Header = TargetWorksheet.Rows(HeaderRow).Find(HeaderStr, LookAt:=xlWhole)
@@ -188,3 +194,4 @@ Public Sub LudicrousMode(ByVal Toggle As Boolean)
     Application.PrintCommunication = Not Toggle
     Application.Calculation = IIf(Toggle, xlCalculationManual, xlCalculationAutomatic)
 End Sub
+
