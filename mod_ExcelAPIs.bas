@@ -163,15 +163,6 @@ Public Function GetURL(ByRef Target As Range) As String
     End If
 End Function
 
-Public Sub CloseWB(ByRef TWorkbook As Workbook)
-    On Error Resume Next
-    If Not TWorkbook Is Nothing Then
-        Application.DisplayAlerts = False
-        TWorkbook.Close
-        Application.DisplayAlerts = True
-    End If
-End Sub
-
 Public Sub UnmergeAndFill(ByRef WorkArea As Range)
     Dim TCell As Range, MAddress As String, MVal As String
     For Each TCell In WorkArea.SpecialCells(xlCellTypeConstants, xlLogical + xlNumbers + xlTextValues).Cells
