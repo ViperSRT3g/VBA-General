@@ -118,7 +118,7 @@ Public Function GetSheet(ByVal SheetName As String, Optional ByRef WB As Workboo
     Set GetSheet = WB.Worksheets(SheetName)
     If GetSheet Is Nothing Then
         Set GetSheet = WB.Worksheets.Add(After:=WB.Worksheets(WB.Worksheets.Count))
-        GetSheet.Name = SheetName
+        GetSheet.Name = Left(SheetName, 31)
     End If
 End Function
 
