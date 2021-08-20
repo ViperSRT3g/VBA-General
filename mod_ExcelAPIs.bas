@@ -111,14 +111,29 @@ Public Function ShapeExists(ByVal Name As String, Optional ByRef TargetWorksheet
 End Function
 
 'Returns a worksheet with the given name, creates a new one if it doesn't already exist
-Public Function GetSheet(ByVal SheetName As String, Optional ByRef WB As Workbook) As Worksheet
+Public Function GetSheet(ByVal SheetName As String, Optional ByRef WB As Workbook, Optional ForceNew As Boolean) As Worksheet
     On Error Resume Next
     If Len(SheetName) = 0 Then Exit Function
     If WB Is Nothing Then Set WB = ThisWorkbook
-    Set GetSheet = WB.Worksheets(SheetName)
-    If GetSheet Is Nothing Then
+    Set GetSheet = WB.Worksheets(Left(SheetName, 31)) 'Test if the given named worksheet exists
+    
+    If ForceNew Then
+        Dim Append As String, MatchCounter As Long
+        If Not GetSheet Is Nothing Then 'If the given named worksheet exists, then begin appending the default ' (N)' postfix
+            Do Until GetSheet Is Nothing
+                Append = " (" & MatchCounter & ")"
+                Set GetSheet = Nothing
+                Set GetSheet = WB.Worksheets(Left(SheetName, 31 - Len(Append)) & Append)
+                MatchCounter = MatchCounter + 1
+            Loop
+        End If
         Set GetSheet = WB.Worksheets.Add(After:=WB.Worksheets(WB.Worksheets.Count))
-        GetSheet.Name = Left(SheetName, 31)
+        GetSheet.Name = Left(SheetName, 31 - Len(Append)) & Append
+    Else
+        If GetSheet Is Nothing Then 'If the given name does not exist, create a worksheet with the given name
+            Set GetSheet = WB.Worksheets.Add(After:=WB.Worksheets(WB.Worksheets.Count))
+            GetSheet.Name = Left(SheetName, 31)
+        End If
     End If
 End Function
 
