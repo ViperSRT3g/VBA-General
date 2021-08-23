@@ -14,6 +14,16 @@ Public Function ActiveCol() As Long
     ActiveCol = Application.ActiveCell.Column
 End Function
 
+'Returns a Range of the current cell executing a UDF
+Public Function CurrentCell() As Range
+    Set CurrentCell = Application.Caller
+End Function
+
+'Returns a boolean if the given cell contains a comment
+Public Function HasComment(ByRef TargetCell As Range) As Boolean
+    HasComment = Not TargetCell.Comment Is Nothing
+End Function
+
 'Returns the last row of the specified worksheet number
 Public Function GetLastRow(ByRef TargetWorksheet As Worksheet, ByVal ColumnNo As Variant) As Long
     GetLastRow = TargetWorksheet.Cells(TargetWorksheet.Rows.Count, ColumnNo).End(xlUp).Row
@@ -22,6 +32,11 @@ End Function
 'Returns the last column of the specified worksheet number
 Public Function GetLastCol(ByRef TargetWorksheet As Worksheet, ByVal RowNo As Variant) As Long
     GetLastCol = TargetWorksheet.Cells(RowNo, TargetWorksheet.Columns.Count).End(xlToLeft).Column
+End Function
+
+'Returns an expanded range of contiguous cells in the given direction from the target range
+Public Function Expand(ByRef Target As Range, ByVal Direction As XlDirection) As Range
+    If Not Target Is Nothing Then Set Expand = Target.Parent.Range(Target, Target.End(Direction))
 End Function
 
 'Adds a given header to the specified worksheet row, and returns the column number the header occupies
@@ -55,33 +70,25 @@ Public Function GetHeaders(ByRef TargetWorksheet As Worksheet, ByVal HeaderRow A
     Set Output = Nothing
 End Function
 
-'Returns an expanded range of contiguous cells in the given direction from the target range
-Public Function Expand(ByRef Target As Range, ByVal Direction As XlDirection) As Range
-    If Not Target Is Nothing Then Set Expand = Target.Parent.Range(Target, Target.End(Direction))
+'Returns a URL within a given cell if it contains one
+Public Function GetURL(ByRef Target As Range) As String
+    'Grab URL if using the insert link method (Just the first one)
+    If Target.Hyperlinks.Count > 0 Then
+        GetURL = Target.Hyperlinks.Item(1).Address
+        Exit Function
+    End If
+    
+    'Grab URL if using the HYPERLINK formula
+    If InStr(1, Target.Formula, "HYPERLINK(""", vbTextCompare) Then
+        Dim SLeft As Long: SLeft = InStr(1, Target.Formula, "HYPERLINK(""", vbTextCompare)
+        Dim SRight As Long: SRight = InStr(SLeft + 11, Target.Formula, """,""", vbTextCompare)
+        GetURL = Mid(Target.Formula, SLeft + 11, SRight - (SLeft + 11))
+    End If
 End Function
 
 'Returns target cell value of a given workbook as a Variant
 Public Function PeekFileCell(ByVal FilePath As String, ByVal FileName As String, ByVal WorksheetName As String, ByVal CellRow As Long, ByVal CellCol As Long) As Variant
     PeekFileCell = ExecuteExcel4Macro("'" & FilePath & "\" & "[" & FileName & "]" & WorksheetName & "'!" & Cells(CellRow, CellCol).Address(1, 1, xlR1C1))
-End Function
-
-'Returns boolean if a given workbook is password protected
-Public Function IsWBProtected(ByRef TWB As Workbook) As Boolean
-    IsWBProtected = TWB.ProtectWindows Or TWB.ProtectStructure
-End Function
-
-'Returns boolean if a given worksheet is password protected
-Public Function IsWSProtected(ByRef TWS As Worksheet) As Boolean
-    IsWSProtected = TWS.ProtectContents Or TWS.ProtectDrawingObjects Or TWS.ProtectScenarios
-End Function
-
-'Returns boolean if a given workbook is currently open
-Public Function IsWorkBookOpen(ByVal WorkbookName As String) As Boolean
-    On Error GoTo ErrorHandler
-    Dim WBO As Workbook: Set WBO = Workbooks(WorkbookName)
-    IsWorkBookOpen = Not WBO Is Nothing
-ErrorHandler:
-    Set WBO = Nothing
 End Function
 
 'Returns a shape object containing the added picture
@@ -110,6 +117,8 @@ Public Function ShapeExists(ByVal Name As String, Optional ByRef TargetWorksheet
     ShapeExists = Not TargetWorksheet.Shapes(Name) Is Nothing
 End Function
 
+
+'WORKSHEET FUNCTIONS
 'Returns a worksheet with the given name, creates a new one if it doesn't already exist
 Public Function GetSheet(ByVal SheetName As String, Optional ByRef WB As Workbook, Optional ForceNew As Boolean) As Worksheet
     On Error Resume Next
@@ -144,6 +153,27 @@ Public Function SheetExists(ByVal SheetName As String, Optional ByRef WB As Work
     SheetExists = Not WB.Worksheets(SheetName) Is Nothing
 End Function
 
+
+'WORKBOOK FUNCTIONS
+'Returns boolean if a given workbook is password protected
+Public Function IsWBProtected(ByRef TWB As Workbook) As Boolean
+    IsWBProtected = TWB.ProtectWindows Or TWB.ProtectStructure
+End Function
+
+'Returns boolean if a given worksheet is password protected
+Public Function IsWSProtected(ByRef TWS As Worksheet) As Boolean
+    IsWSProtected = TWS.ProtectContents Or TWS.ProtectDrawingObjects Or TWS.ProtectScenarios
+End Function
+
+'Returns boolean if a given workbook is currently open
+Public Function IsWorkBookOpen(ByVal WorkbookName As String) As Boolean
+    On Error GoTo ErrorHandler
+    Dim WBO As Workbook: Set WBO = Workbooks(WorkbookName)
+    IsWorkBookOpen = Not WBO Is Nothing
+ErrorHandler:
+    Set WBO = Nothing
+End Function
+
 'Returns a workbook object based on a matching name search
 Public Function FindWorkbook(ByVal WorkbookName As String) As Workbook
     Dim Index As Long
@@ -152,32 +182,27 @@ Public Function FindWorkbook(ByVal WorkbookName As String) As Workbook
     Next Index
 End Function
 
-'Returns a boolean if the given cell contains a comment
-Public Function HasComment(ByRef TargetCell As Range) As Boolean
-    HasComment = Not TargetCell.Comment Is Nothing
+'Returns TRUE if a given workbook reference exists and has not been saved
+Public Function WBNotSaved(TargetWB As Workbook) As Boolean
+    On Error Resume Next
+    If TargetWB Is Nothing Then Exit Function
+    If Len(TargetWB.Path) > 0 Then Exit Function
+    WBNotSaved = Len(TargetWB.Path) = 0
 End Function
 
-'Returns a Range of the current cell executing a UDF
-Public Function CurrentCell() As Range
-    Set CurrentCell = Application.Caller
-End Function
-
-'Returns a URL within a given cell if it contains one
-Public Function GetURL(ByRef Target As Range) As String
-    'Grab URL if using the insert link method (Just the first one)
-    If Target.Hyperlinks.Count > 0 Then
-        GetURL = Target.Hyperlinks.Item(1).Address
-        Exit Function
-    End If
-    
-    'Grab URL if using the HYPERLINK formula
-    If InStr(1, Target.Formula, "HYPERLINK(""", vbTextCompare) Then
-        Dim SLeft As Long: SLeft = InStr(1, Target.Formula, "HYPERLINK(""", vbTextCompare)
-        Dim SRight As Long: SRight = InStr(SLeft + 11, Target.Formula, """,""", vbTextCompare)
-        GetURL = Mid(Target.Formula, SLeft + 11, SRight - (SLeft + 11))
+'Returns TRUE if a given workbook reference is unused. This indicates that the workbook was unexpectedly closed
+Public Function WBNullRef(TargetWB As Workbook) As Boolean
+    On Error Resume Next
+    If TargetWB Is Nothing Then Exit Function
+    If Len(TargetWB.Name) = 0 Then
+        WBNullRef = Not (Err.Number = 0)
+        Err.Clear
     End If
 End Function
 
+
+'SUBROUTINES
+'Unmerges a given range of cells, and fills each cell with the originally merged data
 Public Sub UnmergeAndFill(ByRef WorkArea As Range)
     Dim TCell As Range, MAddress As String, MVal As String
     For Each TCell In WorkArea.SpecialCells(xlCellTypeConstants, xlLogical + xlNumbers + xlTextValues).Cells
