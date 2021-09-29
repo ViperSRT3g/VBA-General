@@ -239,13 +239,59 @@ Public Enum FlashWindowFlags
     FLASHW_TIMERNOFG = &HC&                     'Flashes continuously as long as the window is in the background
 End Enum
 
+Public Enum ASSOCSTR
+    ASSOCSTR_COMMAND = 1                    'A command string associated with a Shell verb
+    ASSOCSTR_EXECUTABLE = 2                 'An executable from a Shell verb command string
+    ASSOCSTR_FRIENDLYDOCNAME = 3            'The friendly name of a document type
+    ASSOCSTR_FRIENDLYAPPNAME = 4            'The friendly name of an executable file
+    ASSOCSTR_NOOPEN = 5                     'Ignore the information associated with the open subkey
+    ASSOCSTR_SHELLNEWVALUE = 6              'Look under the ShellNew subkey.
+    ASSOCSTR_DDECOMMAND = 7                 'A template for DDE commands
+    ASSOCSTR_DDEIFEXEC = 8                  'The DDE command to use to create a process
+    ASSOCSTR_DDEAPPLICATION = 9             'The application name in a DDE broadcast
+    ASSOCSTR_DDETOPIC = 10                  'The topic name in a DDE broadcast
+    ASSOCSTR_INFOTIP = 11                   'Corresponds to the InfoTip registry value
+    ASSOCSTR_QUICKTIP = 12                  'Corresponds to the QuickTip registry value
+    ASSOCSTR_TILEINFO = 13                  'Corresponds to the TileInfo registry value
+    ASSOCSTR_CONTENTTYPE = 14               'Describes a general type of MIME file association
+    ASSOCSTR_DEFAULTICON = 15               'Returns the path to the icon resources to use by default for this association
+    ASSOCSTR_SHELLEXTENSION = 16            'For an object that has a Shell extension associated with it
+    ASSOCSTR_DROPTARGET = 17                'For a verb invoked through COM and the IDropTarget interface
+    ASSOCSTR_DELEGATEEXECUTE = 18           'For a verb invoked through COM and the IExecuteCommand interface
+    ASSOCSTR_SUPPORTED_URI_PROTOCOLS = 19   'A string value of the URI protocol schemes
+    ASSOCSTR_PROGID = 20                    'The ProgID provided by the app associated with the file type or URI scheme
+    ASSOCSTR_APPID = 21                     'The AppUserModelID of the app associated with the file type or URI scheme
+    ASSOCSTR_APPPUBLISHER = 22              'The publisher of the app associated with the file type or URI scheme
+    ASSOCSTR_APPICONREFERENCE = 23          'The icon reference of the app associated with the file type or URI scheme
+    ASSOCSTR_MAX = 24                       'last item in enum...
+End Enum
+
+Public Enum ASSOCF
+    ASSOCF_NONE = &H0                   'None of the following options are set
+    ASSOCF_INIT_NOREMAPCLSID = &H1      'Instructs IQueryAssociations interface methods not to map CLSID values to ProgID values
+    ASSOCF_INIT_BYEXENAME = &H2         'Identifies the value of the pwszAssoc parameter of IQueryAssociations::Init as an executable file name
+    ASSOCF_OPEN_BYEXENAME = &H2         'Identical to ASSOCF_INIT_BYEXENAME
+    ASSOCF_INIT_DEFAULTTOSTAR = &H4     'Retrieve the comparable value from the * subkey when an IQueryAssociations method does not find the requested value
+    ASSOCF_INIT_DEFAULTTOFOLDER = &H8   'Retrieve the comparable value from the Folder subkey
+    ASSOCF_NOUSERSETTINGS = &H10        'Specifies that only HKEY_CLASSES_ROOT should be searched, and that HKEY_CURRENT_USER should be ignored
+    ASSOCF_NOTRUNCATE = &H20            'Specifies that the return string should not be truncated
+    ASSOCF_VERIFY = &H40                'This setting allows IQueryAssociations methods to read data from the user's hard disk for verification
+    ASSOCF_REMAPRUNDLL = &H80           'Tells the method to ignore Rundll.exe and return information about its target
+    ASSOCF_NOFIXUPS = &H100             'Instructs IQueryAssociations methods not to fix errors in the registry
+    ASSOCF_IGNOREBASECLASS = &H200      'Specifies that the BaseClass value should be ignored
+    ASSOCF_INIT_IGNOREUNKNOWN = &H400   'Specifies that the "Unknown" ProgID should be ignored; instead, fail
+    ASSOCF_INIT_FIXED_PROGID = &H800    'Specifies that the supplied ProgID should be mapped using the system defaults
+    ASSOCF_IS_PROTOCOL = &H1000         'Specifies that the value is a protocol, and should be mapped using the current user defaults
+    ASSOCF_INIT_FOR_FILE = &H2000       'Specifies that the ProgID corresponds with a file extension based association. Use together with ASSOCF_INIT_FIXED_PROGID
+End Enum
+
+
 Public Type RECT
     Left As Long
     Top As Long
     Right As Long
     Bottom As Long
 End Type
-
 
 
 #If Win64 And VBA7 Then
@@ -265,6 +311,7 @@ End Type
     Private Declare PtrSafe Function ShowWindow Lib "user32" (ByVal hwnd As Long, ByVal nCmdShow As Long) As Long
     Private Declare PtrSafe Function sndPlaySound32 Lib "winmm.dll" Alias "sndPlaySoundA" (ByVal lpszSoundName As String, ByVal uFlags As Long) As Long
     Private Declare PtrSafe Function FlashWindow Lib "user32" (ByVal hwnd As Long, ByVal dwflags As FlashWindowFlags) As Long
+    Private Declare PtrSafe Function AssocQueryStringW Lib "shlwapi.dll" (ByVal Flags As ASSOCF, ByVal Str As ASSOCSTR, ByVal pszAssoc As Long, ByVal pszExtra As Long, ByVal pszOut As Long, ByRef pcchOut As Long) As Long
 #Else
     Private Declare Function DrawMenuBar Lib "user32" (ByVal hwnd As Long) As Long
     Private Declare Function ExtractIcon Lib "shell32.dll" Alias "ExtractIconA" (ByVal hInst As Long, ByVal lpszExeFileName As String, ByVal nIconIndex As Long) As Long
@@ -282,6 +329,7 @@ End Type
     Private Declare Function ShowWindow Lib "user32" (ByVal hwnd As Long, ByVal nCmdShow As Long) As Long
     Private Declare Function sndPlaySound32 Lib "winmm.dll" Alias "sndPlaySoundA" (ByVal lpszSoundName As String, ByVal uFlags As Long) As Long
     Private Declare Function FlashWindow Lib "user32" (ByVal hwnd As Long, ByVal dwflags As FlashWindowFlags) As Long
+    Private Declare Function AssocQueryStringW Lib "shlwapi.dll" (ByVal Flags As ASSOCF, ByVal Str As ASSOCSTR, ByVal pszAssoc As Long, ByVal pszExtra As Long, ByVal pszOut As Long, ByRef pcchOut As Long) As Long
 #End If
 
 'Get Window Long Constants
@@ -325,7 +373,8 @@ End Function
 
 Public Function SetIcon(ByVal UserFormCaption As String, ByVal IconPath As String, Optional LargeIcon As Boolean = True) As Boolean
     If Len(IconPath) = 0 Then Exit Function
-    If Not (FileExists(IconPath) And ValidIcon(IconPath)) Then Exit Function
+    With CreateObject("Scripting.FileSystemObject"): If Not (.FileExists(IconPath) And ValidIcon(IconPath)) Then Exit Function: End With: End Function
+    
     Dim hwnd As Long: hwnd = GetUserformHwnd(UserFormCaption): If hwnd = 0 Then Exit Function
     Dim IconID As Long: IconID = ExtractIcon(0, IconPath, 0)
     SetIcon = Not CBool(SendMessage(hwnd, WM_SETICON, IIf(LargeIcon, ICON_BIG, ICON_SMALL), IconID))
@@ -410,11 +459,31 @@ Public Function FlashWin(ByVal hwnd As Long, Optional ByVal dwflags As FlashWind
     FlashWin = FlashWindow(hwnd, dwflags)
 End Function
 
+Public Function AssocQuery(FileExtension As String, Assoc As ASSOCSTR, Optional Flags As ASSOCF, Optional sExtra As String = "open") As String
+    Dim Buffer As String: Buffer = String(1024, vbNullChar)
+    Dim BufferSize As Long: BufferSize = Len(Buffer)
+
+    Call AssocQueryStringW(Flags, Assoc, StrPtr(FileExtension), StrPtr(sExtra), StrPtr(Buffer), BufferSize)
+    AssocQuery = Left(Buffer, BufferSize - 1)
+End Function
+
+Public Function ImportFile(FilePath As String, Target As Range, Optional FileLink As Boolean = True) As Boolean
+    'FilePath - Path of the file to import
+    'Target -   Range to place file object on
+    'FileLink - Link to the file, or copy it into the workbook
+    If Len(FilePath) = 0 Then Exit Function
+    With CreateObject("Scripting.FileSystemObject")
+        If Not .FileExists(FilePath) Then Exit Function
+        Dim Output As OLEObject: Set Output = Target.Parent.OLEObjects.Add(FileName:=FilePath, Link:=FileLink, DisplayAsIcon:=True, _
+            IconFileName:=AssocQuery("." & .GetExtensionName(FilePath), 2, 0, "open"), IconLabel:=.GetBaseName(FilePath), _
+            Left:=Target.Left, Top:=Target.Top)
+        Output.Width = Target.Width
+    End With
+    ImportFile = Not (Output Is Nothing)
+    Set Output = Nothing
+End Function
+
 
 'PRIVATE FUNCTIONS
-Private Function FileExists(ByVal FilePath As String) As Boolean
-    With CreateObject("Scripting.FileSystemObject"): FileExists = .FileExists(FilePath): End With: End Function
-Private Function FileExt(ByVal FilePath As String) As String
-    With CreateObject("Scripting.FileSystemObject"): FileExt = .GetExtensionName(FilePath): End With: End Function
 Private Function ValidIcon(ByVal IconPath As String) As Boolean
-    ValidIcon = FileExt(IconPath) = "ico": End Function
+    With CreateObject("Scripting.FileSystemObject"): ValidIcon = .GetExtensionName(IconPath) = "ico": End With: End Function
