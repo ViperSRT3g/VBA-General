@@ -285,6 +285,21 @@ Public Enum ASSOCF
     ASSOCF_INIT_FOR_FILE = &H2000       'Specifies that the ProgID corresponds with a file extension based association. Use together with ASSOCF_INIT_FIXED_PROGID
 End Enum
 
+Public Enum NormalizationForm
+    NormalizationOther = 0
+    NormalizationC = 1
+    NormalizationD = 2
+    NormalizationKC = 5
+    NormalizationKD = 6
+End Enum
+
+Public Enum FoldStringMapFlags
+    MAP_FOLDCZONE = 16
+    MAP_PRECOMPOSED = 32
+    MAP_COMPOSITE = 64
+    MAP_FOLDDIGITS = 128
+End Enum
+
 
 Public Type RECT
     Left As Long
@@ -295,6 +310,7 @@ End Type
 
 
 #If Win64 And VBA7 Then
+    Private Declare PtrSafe Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (lpDest As Any, lpSource As Any, ByVal nCount As Long)
     Private Declare PtrSafe Function DrawMenuBar Lib "user32" (ByVal hwnd As Long) As Long
     Private Declare PtrSafe Function ExtractIcon Lib "shell32.dll" Alias "ExtractIconA" (ByVal hInst As Long, ByVal lpszExeFileName As String, ByVal nIconIndex As Long) As Long
     Private Declare PtrSafe Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
@@ -312,7 +328,10 @@ End Type
     Private Declare PtrSafe Function sndPlaySound32 Lib "winmm.dll" Alias "sndPlaySoundA" (ByVal lpszSoundName As String, ByVal uFlags As Long) As Long
     Private Declare PtrSafe Function FlashWindow Lib "user32" (ByVal hwnd As Long, ByVal dwflags As FlashWindowFlags) As Long
     Private Declare PtrSafe Function AssocQueryStringW Lib "shlwapi.dll" (ByVal Flags As ASSOCF, ByVal Str As ASSOCSTR, ByVal pszAssoc As Long, ByVal pszExtra As Long, ByVal pszOut As Long, ByRef pcchOut As Long) As Long
+    Private Declare PtrSafe Function NormalizeString Lib "Normaliz" (ByVal normForm As Long, ByVal lpSrcString As LongPtr, ByVal cwSrcLength As Long, ByVal lpDstString As LongPtr, ByVal cwDstLength As Long) As Long
+    Private Declare PtrSafe Function FoldString Lib "kernel32" Alias "FoldStringA" (ByVal dwMapFlags As FoldStringMapFlags, ByVal lpSrcStr As Long, ByVal cchSrc As Long, ByVal lpDestStr As Long, ByVal cchdest As Long) As Long
 #Else
+    Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (lpDest As Any, lpSource As Any, ByVal nCount As Long)
     Private Declare Function DrawMenuBar Lib "user32" (ByVal hwnd As Long) As Long
     Private Declare Function ExtractIcon Lib "shell32.dll" Alias "ExtractIconA" (ByVal hInst As Long, ByVal lpszExeFileName As String, ByVal nIconIndex As Long) As Long
     Private Declare Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
@@ -330,6 +349,8 @@ End Type
     Private Declare Function sndPlaySound32 Lib "winmm.dll" Alias "sndPlaySoundA" (ByVal lpszSoundName As String, ByVal uFlags As Long) As Long
     Private Declare Function FlashWindow Lib "user32" (ByVal hwnd As Long, ByVal dwflags As FlashWindowFlags) As Long
     Private Declare Function AssocQueryStringW Lib "shlwapi.dll" (ByVal Flags As ASSOCF, ByVal Str As ASSOCSTR, ByVal pszAssoc As Long, ByVal pszExtra As Long, ByVal pszOut As Long, ByRef pcchOut As Long) As Long
+    Private Declare Function NormalizeString Lib "Normaliz" (ByVal normForm As Long, ByVal lpSrcString As LongPtr, ByVal cwSrcLength As Long, ByVal lpDstString As LongPtr, ByVal cwDstLength As Long) As Long
+    Private Declare Function FoldString Lib "kernel32" Alias "FoldStringA" (ByVal dwMapFlags As FoldStringMapFlags, ByVal lpSrcStr As Long, ByVal cchSrc As Long, ByVal lpDestStr As Long, ByVal cchdest As Long) As Long
 #End If
 
 'Get Window Long Constants
@@ -467,6 +488,7 @@ Public Function AssocQuery(FileExtension As String, Assoc As ASSOCSTR, Optional 
     AssocQuery = Left(Buffer, BufferSize - 1)
 End Function
 
+'Utilized for importing files, or setting up links to files in Excel
 Public Function ImportFile(FilePath As String, Target As Range, Optional FileLink As Boolean = True) As Boolean
     'FilePath - Path of the file to import
     'Target -   Range to place file object on
@@ -483,7 +505,38 @@ Public Function ImportFile(FilePath As String, Target As Range, Optional FileLin
     Set Output = Nothing
 End Function
 
+'Normalizes a given unicode string to W3C standards (https://unicode.org/reports/tr15/)
+Public Function NormalizeUnicode(RawString As String, Optional Normalization As NormalizationForm = NormalizationC) As String
+    If Len(RawString) = 0 Then Exit Function
+    NormalizeUnicode = String(Len(RawString), 0)
+    Call NormalizeString(Normalization, StrPtr(RawString), Len(RawString), StrPtr(NormalizeUnicode), Len(NormalizeUnicode))
+End Function
+
+'Normalizes and converts unicode characters to their transliterated English equivalents
+Function CleanUnicode(RawString As String, Optional Normalization As NormalizationForm = NormalizationC) As String
+    If Len(RawString) = 0 Then Exit Function
+    Dim Index As Long
+    
+    CleanUnicode = NormalizeUnicode(RawString, Normalization)
+    For Index = 0 To Len(RawString) * 2 - 2 Step 2
+        Call FoldString(MAP_COMPOSITE, StrPtr(RawString) + Index, 1, StrPtr(CleanUnicode) + Index, 1)
+    Next Index
+End Function
+
+'Returns the string stored at a given location in memory (Inverse of StrPtr() function)
+Public Function PtrStr(StrPointer As LongPtr) As String
+    If StrPointer = 0 Then Exit Function
+    Dim Offset As Long, Buffer(1) As Byte, BufferStr As String
+    Do
+        Call CopyMemory(Buffer(0), ByVal StrPointer + Offset, 2)
+        BufferStr = IIf(Not (Buffer(0) = 0 And Buffer(1) = 0), Buffer, vbNullString)
+        PtrStr = PtrStr & BufferStr
+        Offset = Offset + 2
+    Loop Until Buffer(0) = 0 And Buffer(1) = 0
+End Function
+
 
 'PRIVATE FUNCTIONS
 Private Function ValidIcon(ByVal IconPath As String) As Boolean
-    With CreateObject("Scripting.FileSystemObject"): ValidIcon = .GetExtensionName(IconPath) = "ico": End With: End Function
+    With CreateObject("Scripting.FileSystemObject"): ValidIcon = .GetExtensionName(IconPath) = "ico": End With
+End Function
