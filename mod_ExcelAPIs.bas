@@ -70,6 +70,28 @@ Public Function GetHeaders(ByRef TargetWorksheet As Worksheet, ByVal HeaderRow A
     Set Output = Nothing
 End Function
 
+'Returns a Variant Array (Of Variant Array) that loads a given worksheet's data in batches
+'Ideal for extremely large worksheets that would normally result in an overflow error from exceeding the maximum array size
+'Adjust RowCount based on how many columns of data your worksheet has
+Public Function BatchLoad(TSheet As Worksheet, Optional RowCount As Long = 1000) As Variant
+    If TSheet Is Nothing Then Exit Function
+    Dim Output() As Variant: ReDim Output(Application.WorksheetFunction.RoundDown(TSheet.UsedRange.Rows.Count, 0) - 1) As Variant
+    Dim Index As Long, RowC As Long: RowC = 2
+    Dim FCell As Range, LCell As Range
+    For Index = LBound(Output, 1) To UBound(Output, 1)
+        If Index = UBound(Output, 1) Then
+            Set FCell = TSheet.Cells(RowC, 1)
+            Set LCell = TSheet.Cells(TSheet.UsedRange.Rows.Count, TSheet.UsedRange.Columns.Count)
+        Else
+            Set FCell = TSheet.Cells(RowC, 1): RowC = RowC + RowCount - 1
+            Set LCell = TSheet.Cells(RowC, TSheet.UsedRange.Columns.Count): RowC = RowC + 1
+        End If
+        'Debug.Print FCell.Address, LCell.Address
+        Output(Index) = TSheet.Range(FCell, LCell)
+    Next Index
+    BatchLoad = Output
+End Function
+
 'Returns a URL within a given cell if it contains one
 Public Function GetURL(ByRef Target As Range) As String
     'Grab URL if using the insert link method (Just the first one)
