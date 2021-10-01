@@ -75,7 +75,7 @@ End Function
 'Adjust RowCount based on how many columns of data your worksheet has
 Public Function BatchLoad(TSheet As Worksheet, Optional RowCount As Long = 1000) As Variant
     If TSheet Is Nothing Then Exit Function
-    Dim Output() As Variant: ReDim Output(Application.WorksheetFunction.RoundDown(TSheet.UsedRange.Rows.Count, 0) - 1) As Variant
+    Dim Output() As Variant: ReDim Output(Application.WorksheetFunction.RoundDown(TSheet.UsedRange.Rows.Count / RowCount, 0) - 1) As Variant
     Dim Index As Long, RowC As Long: RowC = 2
     Dim FCell As Range, LCell As Range
     For Index = LBound(Output, 1) To UBound(Output, 1)
