@@ -300,6 +300,12 @@ Public Enum FoldStringMapFlags
     MAP_FOLDDIGITS = 128
 End Enum
 
+Public Enum SystemInfoType
+    TotalRAMPercent = 1
+    ProcessMem = 2
+    ProcessCPU = 3
+End Enum
+
 
 Public Type RECT
     Left As Long
@@ -535,6 +541,32 @@ Public Function PtrStr(StrPointer As LongPtr) As String
     Loop Until Buffer(0) = 0 And Buffer(1) = 0
 End Function
 
+'Returns the corresponding System Information specified by the passed InfoType and Process name ("EXCEL.EXE"/"EXCEL") as examples
+Public Function SystemInfo(InfoType As SystemInfoType, Optional ProcessName As String) As Variant
+    Dim Query As Object, Item As Object
+    
+    Select Case InfoType
+        Case TotalRAMPercent
+            Set Query = GetObject("WinMgmts:root/cimv2").ExecQuery("Select * FROM Win32_PerfFormattedData_PerfOS_Memory")
+        Case ProcessMem
+            If Len(ProcessName) = 0 Then Exit Function
+            Set Query = GetObject("winmgmts:").ExecQuery("SELECT WorkingSetSize FROM Win32_Process WHERE Name='" & ProcessName & "'")
+        Case ProcessCPU
+            If Len(ProcessName) = 0 Then Exit Function
+            Set Query = GetObject("winmgmts:").ExecQuery("SELECT PercentProcessorTime FROM win32_PerfFormattedData_PerfProc_Process WHERE Name='" & ProcessName & "'")
+    End Select
+    
+    For Each Item In Query
+        Select Case InfoType
+            Case TotalRAMPercent
+                SystemInfo = Item.PercentCommittedBytesInUse
+            Case ProcessMem 'Value in bytes
+                SystemInfo = Item.WorkingSetSize
+            Case ProcessCPU
+                SystemInfo = Item.PercentProcessorTime
+        End Select
+    Next Item
+End Function
 
 'PRIVATE FUNCTIONS
 Private Function ValidIcon(ByVal IconPath As String) As Boolean
