@@ -20,51 +20,53 @@ Public Function CurrentCell() As Range
 End Function
 
 'Returns a boolean if the given cell contains a comment
-Public Function HasComment(ByRef TargetCell As Range) As Boolean
+Public Function HasComment(TargetCell As Range) As Boolean
+    If TargetCell Is Nothing Then Exit Function
     HasComment = Not TargetCell.Comment Is Nothing
 End Function
 
 'Returns the last row of the specified worksheet number
-Public Function GetLastRow(ByRef TargetWorksheet As Worksheet, ByVal ColumnNo As Variant) As Long
+Public Function GetLastRow(TargetWorksheet As Worksheet, ColumnNo As Variant) As Long
+    If TargetWorksheet Is Nothing Then Exit Function
     GetLastRow = TargetWorksheet.Cells(TargetWorksheet.Rows.Count, ColumnNo).End(xlUp).Row
 End Function
 
 'Returns the last column of the specified worksheet number
-Public Function GetLastCol(ByRef TargetWorksheet As Worksheet, ByVal RowNo As Variant) As Long
+Public Function GetLastCol(TargetWorksheet As Worksheet, RowNo As Variant) As Long
+    If TargetWorksheet Is Nothing Then Exit Function
     GetLastCol = TargetWorksheet.Cells(RowNo, TargetWorksheet.Columns.Count).End(xlToLeft).Column
 End Function
 
 'Returns an expanded range of contiguous cells in the given direction from the target range
-Public Function Expand(ByRef Target As Range, ByVal Direction As XlDirection) As Range
+Public Function Expand(Target As Range, Direction As XlDirection) As Range
     If Not Target Is Nothing Then Set Expand = Target.Parent.Range(Target, Target.End(Direction))
 End Function
 
 'Adds a given header to the specified worksheet row, and returns the column number the header occupies
-Public Function AddHeader(ByRef TargetWorksheet As Worksheet, ByVal RowNo As Variant, ByVal HeaderName As String) As Long
+Public Function AddHeader(TargetWorksheet As Worksheet, RowNo As Variant, HeaderName As String) As Long
+    If TargetWorksheet Is Nothing Or Len(HeaderName) = 0 Then Exit Function
     TargetWorksheet.Cells(RowNo, TargetWorksheet.Cells(RowNo, TargetWorksheet.Columns.Count).End(xlToLeft).Column + 1).Value = HeaderName
     AddHeader = TargetWorksheet.Cells(RowNo, TargetWorksheet.Columns.Count).End(xlToLeft).Column
 End Function
 
 'Returns the Column number of the specified header string, from the specified row of the given worksheet
-Public Function GetHeader(ByRef TargetWorksheet As Worksheet, ByVal HeaderRow As Long, ByVal HeaderStr As String) As Long
+Public Function GetHeader(TargetWorksheet As Worksheet, HeaderRow As Long, HeaderStr As String) As Long
+    If TargetWorksheet Is Nothing Or HeaderRow < 1 Or Len(HeaderStr) = 0 Then Exit Function
     Dim Header As Range: Set Header = TargetWorksheet.Rows(HeaderRow).Find(HeaderStr, LookAt:=xlWhole)
-    If Not Header Is Nothing Then
-        GetHeader = Header.Column
-        Set Header = Nothing
-    End If
+    If Not Header Is Nothing Then GetHeader = Header.Column
+    Set Header = Nothing
 End Function
 
 'Returns a Dictionary of all headers in a given row of a given worksheet with their associated column numbers
 'Used in conjunction with the GetHeader function
-Public Function GetHeaders(ByRef TargetWorksheet As Worksheet, ByVal HeaderRow As Long, Optional CaseSensitive As Boolean) As Object
+Public Function GetHeaders(TargetWorksheet As Worksheet, HeaderRow As Long, Optional CaseSensitive As Boolean) As Object
+    If TargetWorksheet Is Nothing Or HeaderRow < 1 Then Exit Function
     Dim Output As Object: Set Output = CreateObject("Scripting.Dictionary")
-    Dim ColCounter As Long
+    Output.CompareMode = IIf(CaseSensitive, vbBinaryCompare, vbTextCompare)
+    Dim ColCounter As Long, HeaderValue As String
     For ColCounter = 1 To GetLastCol(TargetWorksheet, HeaderRow)
-        If CaseSensitive Then 'Headers are untouched
-            Output(CStr(TargetWorksheet.Cells(HeaderRow, ColCounter).Value)) = ColCounter
-        Else 'Headers are all Uppercase
-            Output(UCase(CStr(TargetWorksheet.Cells(HeaderRow, ColCounter).Value))) = ColCounter
-        End If
+        HeaderValue = CStr(TargetWorksheet.Cells(HeaderRow, ColCounter).Text)
+        If Not Len(HeaderValue) = 0 Then Output(HeaderValue) = ColCounter
     Next ColCounter
     Set GetHeaders = Output
     Set Output = Nothing
@@ -86,20 +88,19 @@ Public Function BatchLoad(TSheet As Worksheet, Optional RowCount As Long = 1000)
             Set FCell = TSheet.Cells(RowC, 1): RowC = RowC + RowCount - 1
             Set LCell = TSheet.Cells(RowC, TSheet.UsedRange.Columns.Count): RowC = RowC + 1
         End If
-        'Debug.Print FCell.Address, LCell.Address
         Output(Index) = TSheet.Range(FCell, LCell)
     Next Index
     BatchLoad = Output
 End Function
 
 'Returns a URL within a given cell if it contains one
-Public Function GetURL(ByRef Target As Range) As String
+Public Function GetURL(Target As Range) As String
+    If Target Is Nothing Then Exit Function
     'Grab URL if using the insert link method (Just the first one)
     If Target.Hyperlinks.Count > 0 Then
         GetURL = Target.Hyperlinks.Item(1).Address
         Exit Function
     End If
-    
     'Grab URL if using the HYPERLINK formula
     If InStr(1, Target.Formula, "HYPERLINK(""", vbTextCompare) Then
         Dim SLeft As Long: SLeft = InStr(1, Target.Formula, "HYPERLINK(""", vbTextCompare)
@@ -109,32 +110,31 @@ Public Function GetURL(ByRef Target As Range) As String
 End Function
 
 'Returns target cell value of a given workbook as a Variant
-Public Function PeekFileCell(ByVal FilePath As String, ByVal FileName As String, ByVal WorksheetName As String, ByVal CellRow As Long, ByVal CellCol As Long) As Variant
+Public Function PeekFileCell(FilePath As String, FileName As String, WorksheetName As String, CellRow As Long, CellCol As Long) As Variant
+    If Len(FilePath) = 0 Or Len(FileName) = 0 Or Len(WorksheetName) = 0 Or CellRow < 1 Or CellCol < 1 Then Exit Function
     PeekFileCell = ExecuteExcel4Macro("'" & FilePath & "\" & "[" & FileName & "]" & WorksheetName & "'!" & Cells(CellRow, CellCol).Address(1, 1, xlR1C1))
 End Function
 
 'Returns a shape object containing the added picture
-Public Function AddPicture(ByRef TargetSheet As Worksheet, ByVal Path As String, ByVal Left As Single, ByVal Top As Single, _
-                             Width As Single, ByVal Height As Single, Optional ByVal ShapeName As String) As Shape
-    Set AddPicture = TargetSheet.Shapes.AddPicture(Path, msoFalse, msoTrue, Left, Top, Width, Height)
+Public Function AddPicture(TargetSheet As Worksheet, Path As String, Left As Single, Top As Single, _
+                           width As Single, height As Single, Optional ShapeName As String) As Shape
+    If TargetSheet Is Nothing Or Len(Path) = 0 Then Exit Function
+    Set AddPicture = TargetSheet.Shapes.AddPicture(Path, msoFalse, msoTrue, Left, Top, width, height)
     If Len(ShapeName) > 0 Then AddPicture.Name = ShapeName
 End Function
 
 'Returns a boolean if a given CheckBox exists with a given name in a given worksheet
-Public Function CheckBoxExists(ByVal Name As String, ByRef TargetWorksheet As Worksheet) As Boolean
+Public Function CheckBoxExists(Name As String, TargetWorksheet As Worksheet) As Boolean
+    On Error Resume Next
+    If Len(Name) = 0 Then Exit Function
     If TargetWorksheet Is Nothing Then Set TargetWorksheet = ActiveSheet
-    Dim TCB As CheckBox
-    For Each TCB In TargetWorksheet.CheckBoxes
-        If TCB.Name = Name Then
-            CheckBoxExists = True: Set TCB = Nothing: Exit Function
-        End If
-    Next TCB
-    Set TCB = Nothing
+    CheckBoxExists = Not TargetWorksheet.CheckBoxes(Name) Is Nothing
 End Function
 
 'Returns a boolean if a given shape exists in a given worksheet
 Public Function ShapeExists(ByVal Name As String, Optional ByRef TargetWorksheet As Worksheet) As Boolean
     On Error Resume Next
+    If Len(Name) = 0 Then Exit Function
     If TargetWorksheet Is Nothing Then Set TargetWorksheet = ActiveSheet
     ShapeExists = Not TargetWorksheet.Shapes(Name) Is Nothing
 End Function
@@ -142,7 +142,7 @@ End Function
 
 'WORKSHEET FUNCTIONS
 'Returns a worksheet with the given name, creates a new one if it doesn't already exist
-Public Function GetSheet(ByVal SheetName As String, Optional ByRef WB As Workbook, Optional ForceNew As Boolean) As Worksheet
+Public Function GetSheet(SheetName As String, Optional WB As Workbook, Optional ForceNew As Boolean) As Worksheet
     On Error Resume Next
     If Len(SheetName) = 0 Then Exit Function
     If WB Is Nothing Then Set WB = ThisWorkbook
@@ -175,6 +175,16 @@ Public Function SheetExists(ByVal SheetName As String, Optional ByRef WB As Work
     SheetExists = Not WB.Worksheets(SheetName) Is Nothing
 End Function
 
+'Sanitizes a given string to comply with Excel's Worksheet naming scheme
+Public Function CleanSheetName(WorksheetName As String) As String
+    CleanSheetName = WorksheetName
+    Const InvalidChars As String = "\/?*[]"
+    Dim Index As Long
+    For Index = 1 To Len(InvalidChars)
+        CleanSheetName = Replace(CleanSheetName, Mid(InvalidChars, Index, 1), "")
+    Next Index
+    CleanSheetName = Left(CleanSheetName, 31)
+End Function
 
 'WORKBOOK FUNCTIONS
 'Returns boolean if a given workbook is password protected
