@@ -317,22 +317,22 @@ End Type
 
 #If Win64 And VBA7 Then
     Private Declare PtrSafe Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (lpDest As Any, lpSource As Any, ByVal nCount As Long)
-    Private Declare PtrSafe Function DrawMenuBar Lib "user32" (ByVal hwnd As Long) As Long
+    Private Declare PtrSafe Function DrawMenuBar Lib "user32" (ByVal hWnd As Long) As Long
     Private Declare PtrSafe Function ExtractIcon Lib "shell32.dll" Alias "ExtractIconA" (ByVal hInst As Long, ByVal lpszExeFileName As String, ByVal nIconIndex As Long) As Long
     Private Declare PtrSafe Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
     Private Declare PtrSafe Function GetAsyncKeyState Lib "user32" (ByVal VKey As Long) As Integer
     Private Declare PtrSafe Function GetTickCount Lib "kernel32" () As Long
-    Private Declare PtrSafe Function GetWindowLong Lib "user32" Alias "GetWindowLongA" (ByVal hwnd As Long, ByVal nIndex As Long) As Long
+    Private Declare PtrSafe Function GetWindowLong Lib "user32" Alias "GetWindowLongA" (ByVal hWnd As Long, ByVal nIndex As Long) As Long
     Private Declare PtrSafe Function IntersectRect Lib "user32" (lpDestRect As RECT, lpSrc1Rect As RECT, lpSrc2Rect As RECT) As Long
-    Private Declare PtrSafe Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hwnd As Long, ByVal wMsg As Long, ByVal wParam As Integer, ByVal lParam As Long) As Long
-    Private Declare PtrSafe Function SetForegroundWindow Lib "user32" (ByVal hwnd As Long) As Long
-    Private Declare PtrSafe Function SetLayeredWindowAttributes Lib "User32.dll" (ByVal hwnd As Long, ByVal crKey As Long, ByVal bAlpha As Byte, ByVal dwflags As Long) As Long
+    Private Declare PtrSafe Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Integer, ByVal lParam As Long) As Long
+    Private Declare PtrSafe Function SetForegroundWindow Lib "user32" (ByVal hWnd As Long) As Long
+    Private Declare PtrSafe Function SetLayeredWindowAttributes Lib "User32.dll" (ByVal hWnd As Long, ByVal crKey As Long, ByVal bAlpha As Byte, ByVal dwflags As Long) As Long
     Private Declare PtrSafe Function SetParent Lib "user32" (ByVal hWndChild As Long, ByVal hWndNewParent As Long) As Long
-    Private Declare PtrSafe Function SetWindowLong Lib "user32" Alias "SetWindowLongA" (ByVal hwnd As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
-    Private Declare PtrSafe Function SetWindowPos Lib "user32" (ByVal hwnd As Long, ByVal hWndInsertAfter As Long, ByVal X As Long, ByVal Y As Long, ByVal cx As Long, ByVal cy As Long, ByVal wFlags As Long) As Long
-    Private Declare PtrSafe Function ShowWindow Lib "user32" (ByVal hwnd As Long, ByVal nCmdShow As Long) As Long
+    Private Declare PtrSafe Function SetWindowLong Lib "user32" Alias "SetWindowLongA" (ByVal hWnd As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
+    Private Declare PtrSafe Function SetWindowPos Lib "user32" (ByVal hWnd As Long, ByVal hWndInsertAfter As Long, ByVal X As Long, ByVal Y As Long, ByVal cx As Long, ByVal cy As Long, ByVal wFlags As Long) As Long
+    Private Declare PtrSafe Function ShowWindow Lib "user32" (ByVal hWnd As Long, ByVal nCmdShow As Long) As Long
     Private Declare PtrSafe Function sndPlaySound32 Lib "winmm.dll" Alias "sndPlaySoundA" (ByVal lpszSoundName As String, ByVal uFlags As Long) As Long
-    Private Declare PtrSafe Function FlashWindow Lib "user32" (ByVal hwnd As Long, ByVal dwflags As FlashWindowFlags) As Long
+    Private Declare PtrSafe Function FlashWindow Lib "user32" (ByVal hWnd As Long, ByVal dwflags As FlashWindowFlags) As Long
     Private Declare PtrSafe Function AssocQueryStringW Lib "shlwapi.dll" (ByVal Flags As ASSOCF, ByVal Str As ASSOCSTR, ByVal pszAssoc As Long, ByVal pszExtra As Long, ByVal pszOut As Long, ByRef pcchOut As Long) As Long
     Private Declare PtrSafe Function NormalizeString Lib "Normaliz" (ByVal normForm As Long, ByVal lpSrcString As LongPtr, ByVal cwSrcLength As Long, ByVal lpDstString As LongPtr, ByVal cwDstLength As Long) As Long
     Private Declare PtrSafe Function FoldString Lib "kernel32" Alias "FoldStringA" (ByVal dwMapFlags As FoldStringMapFlags, ByVal lpSrcStr As Long, ByVal cchSrc As Long, ByVal lpDestStr As Long, ByVal cchdest As Long) As Long
@@ -380,7 +380,7 @@ Private Const WS_EX_LAYERED = &H80000
 'PUBLIC SUBROUTINES
 Public Sub ModifyForm(ByVal UserFormCaption As String, Optional FormResizable As Boolean, Optional EnableResizeButtons As Boolean = True, Optional ShowinTaskbar As Boolean = True, Optional IconFilePath As String)
     If Len(UserFormCaption) = 0 Then Exit Sub
-    Dim hwnd As Long: hwnd = GetUserformHwnd(UserFormCaption): If hwnd = 0 Then Exit Sub
+    Dim hWnd As Long: hWnd = GetUserformHwnd(UserFormCaption): If hWnd = 0 Then Exit Sub
     If ValidIcon(IconFilePath) Then Call SetIcon(UserFormCaption, IconFilePath)
     If EnableResizeButtons Then Call ResizeOptions(UserFormCaption, FormResizable:=FormResizable)
     If FormResizable Then Call SetWinStyle(UserFormCaption, WS_SIZEBOX)
@@ -389,75 +389,84 @@ End Sub
 
 
 'PUBLIC FUNCTIONS
+'Exposes the FindWindow WINAPI directly for use outside of this module
 Public Function GetHwnd(ByVal ClassName As String, ByVal WindowName As String) As Long
     GetHwnd = FindWindow(ClassName, WindowName)
 End Function
 
+'Returns the window handle for the given userform
 Public Function GetUserformHwnd(ByVal UserFormCaption As String) As Long
     If Len(UserFormCaption) = 0 Then Exit Function
     GetUserformHwnd = FindWindow("ThunderDFrame", UserFormCaption)
+End Function
+
+'Returns the current window style value for the given userform
+Public Function GetWinStyle(ByVal UserFormCaption As String) As Long
+    Dim hWnd As Long: hWnd = GetUserformHwnd(UserFormCaption): If hWnd = 0 Then Exit Function
+    GetWinStyle = GetWindowLong(hWnd, GWL_STYLE)
 End Function
 
 Public Function SetIcon(ByVal UserFormCaption As String, ByVal IconPath As String, Optional LargeIcon As Boolean = True) As Boolean
     If Len(IconPath) = 0 Then Exit Function
     With CreateObject("Scripting.FileSystemObject"): If Not (.FileExists(IconPath) And ValidIcon(IconPath)) Then Exit Function: End With: End Function
     
-    Dim hwnd As Long: hwnd = GetUserformHwnd(UserFormCaption): If hwnd = 0 Then Exit Function
+    Dim hWnd As Long: hWnd = GetUserformHwnd(UserFormCaption): If hWnd = 0 Then Exit Function
     Dim IconID As Long: IconID = ExtractIcon(0, IconPath, 0)
-    SetIcon = Not CBool(SendMessage(hwnd, WM_SETICON, IIf(LargeIcon, ICON_BIG, ICON_SMALL), IconID))
+    SetIcon = Not CBool(SendMessage(hWnd, WM_SETICON, IIf(LargeIcon, ICON_BIG, ICON_SMALL), IconID))
 End Function
 
-Public Function SetWinStyle(ByVal UserFormCaption As String, Optional ByVal WStyle As WindowStyleFlags) As Boolean
-    Dim hwnd As Long: hwnd = GetUserformHwnd(UserFormCaption): If hwnd = 0 Then Exit Function
-    SetWinStyle = SetWindowLong(hwnd, GWL_STYLE, GetWindowLong(hwnd, GWL_STYLE) Or WStyle)
-    Call DrawMenuBar(hwnd) 'Redraws the menu bar of the specified window. If the menu bar changes after the system has created the window, this function must be called to draw the changed menu bar.
+'Sets the window style for a given userform. Flags can be combined in a single call
+Public Function SetWinStyle(ByVal UserFormCaption As String, ByVal WStyle As WindowStyleFlags) As Boolean
+    Dim hWnd As Long: hWnd = GetUserformHwnd(UserFormCaption): If hWnd = 0 Then Exit Function
+    SetWinStyle = SetWindowLong(hWnd, GWL_STYLE, WStyle)
+    Call DrawMenuBar(hWnd) 'Redraws the menu bar of the specified window. If the menu bar changes after the system has created the window, this function must be called to draw the changed menu bar.
 End Function
 
 Public Function SetWindowPosition(ByVal UserFormCaption As String, Optional ByVal WPFlags As WindowPositionFlags) As Boolean
-    Dim hwnd As Long: hwnd = GetUserformHwnd(UserFormCaption): If hwnd = 0 Then Exit Function
-    SetWindowPosition = SetWindowPos(hwnd, 0, 0, 0, 0, 0, WPFlags)
-    Call DrawMenuBar(hwnd) 'Redraws the menu bar of the specified window. If the menu bar changes after the system has created the window, this function must be called to draw the changed menu bar.
+    Dim hWnd As Long: hWnd = GetUserformHwnd(UserFormCaption): If hWnd = 0 Then Exit Function
+    SetWindowPosition = SetWindowPos(hWnd, 0, 0, 0, 0, 0, WPFlags)
+    Call DrawMenuBar(hWnd) 'Redraws the menu bar of the specified window. If the menu bar changes after the system has created the window, this function must be called to draw the changed menu bar.
 End Function
 
 Public Function DisplayInTaskbar(ByVal UserFormCaption As String) As Boolean
-    Dim hwnd As Long: hwnd = GetUserformHwnd(UserFormCaption): If hwnd = 0 Then Exit Function
-    DisplayInTaskbar = SetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_NOACTIVATE Or SWP_HIDEWINDOW) And _
-                       SetWindowLong(hwnd, GWL_EXSTYLE, GetWindowLong(hwnd, GWL_EXSTYLE) Or WS_SIZEBOX) And _
-                       SetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_NOACTIVATE Or SWP_SHOWWINDOW)
-    Call DrawMenuBar(hwnd)
+    Dim hWnd As Long: hWnd = GetUserformHwnd(UserFormCaption): If hWnd = 0 Then Exit Function
+    DisplayInTaskbar = SetWindowPos(hWnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_NOACTIVATE Or SWP_HIDEWINDOW) And _
+                       SetWindowLong(hWnd, GWL_EXSTYLE, GetWindowLong(hWnd, GWL_EXSTYLE) Or WS_SIZEBOX) And _
+                       SetWindowPos(hWnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_NOACTIVATE Or SWP_SHOWWINDOW)
+    Call DrawMenuBar(hWnd)
 End Function
 
 Public Function ResizeOptions(ByVal UserFormCaption As String, Optional Minimize As Boolean = True, Optional Maximize As Boolean = True, Optional FormResizable As Boolean) As Boolean
-    Dim hwnd As Long: hwnd = GetUserformHwnd(UserFormCaption): If hwnd = 0 Then Exit Function
+    Dim hWnd As Long: hWnd = GetUserformHwnd(UserFormCaption): If hWnd = 0 Then Exit Function
     Dim ROptions As Long
     If Minimize Then ROptions = ROptions Or WS_MINIMIZEBOX
     If Maximize Then ROptions = ROptions Or WS_MAXIMIZEBOX
     If FormResizable Then ROptions = ROptions Or WS_SIZEBOX
-    ResizeOptions = SetWindowLong(hwnd, GWL_STYLE, GetWindowLong(hwnd, GWL_STYLE) Or ROptions)
-    Call DrawMenuBar(hwnd)
+    ResizeOptions = SetWindowLong(hWnd, GWL_STYLE, GetWindowLong(hWnd, GWL_STYLE) Or ROptions)
+    Call DrawMenuBar(hWnd)
 End Function
 
 Public Function SetTransparency(ByVal UserFormCaption As String, R As Integer, G As Integer, B As Integer) As Boolean
-    Dim hwnd As Long: hwnd = GetUserformHwnd(UserFormCaption): If hwnd = 0 Then Exit Function
+    Dim hWnd As Long: hWnd = GetUserformHwnd(UserFormCaption): If hWnd = 0 Then Exit Function
     Dim Color As LongPtr: Color = VBA.RGB(R, G, B)
     Dim RetVal As Long: RetVal = RetVal Or WS_EX_LAYERED
-    If SetWindowLong(hwnd, GWL_EXSTYLE, RetVal) Then SetTransparency = CBool(SetLayeredWindowAttributes(hwnd, Color, 0, LWA_COLORKEY))
+    If SetWindowLong(hWnd, GWL_EXSTYLE, RetVal) Then SetTransparency = CBool(SetLayeredWindowAttributes(hWnd, Color, 0, LWA_COLORKEY))
 End Function
 
 Public Function SetTranslucency(ByVal UserFormCaption As String, ByVal Alpha As Byte) As Boolean
-    Dim hwnd As Long: hwnd = GetUserformHwnd(UserFormCaption): If hwnd = 0 Then Exit Function
-    Dim lStyle As Long: lStyle = GetWindowLong(hwnd, GWL_EXSTYLE) Or WS_EX_LAYERED
-    If SetWindowLong(hwnd, GWL_EXSTYLE, lStyle) Then SetTranslucency = CBool(SetLayeredWindowAttributes(hwnd, 0, CLng(Alpha), LWA_ALPHA))
+    Dim hWnd As Long: hWnd = GetUserformHwnd(UserFormCaption): If hWnd = 0 Then Exit Function
+    Dim lStyle As Long: lStyle = GetWindowLong(hWnd, GWL_EXSTYLE) Or WS_EX_LAYERED
+    If SetWindowLong(hWnd, GWL_EXSTYLE, lStyle) Then SetTranslucency = CBool(SetLayeredWindowAttributes(hWnd, 0, CLng(Alpha), LWA_ALPHA))
 End Function
 
 Public Function SetTopmost(ByVal UserFormCaption As String, ByVal Toggle As Boolean) As Boolean
-    Dim hwnd As Long: hwnd = GetUserformHwnd(UserFormCaption): If hwnd = 0 Then Exit Function
-    SetTopmost = SetWindowPos(hwnd, IIf(Toggle, HWND_TOPMOST, HWND_NOTOPMOST), 0, 0, 0, 0, SWP_NOMOVE)
+    Dim hWnd As Long: hWnd = GetUserformHwnd(UserFormCaption): If hWnd = 0 Then Exit Function
+    SetTopmost = SetWindowPos(hWnd, IIf(Toggle, HWND_TOPMOST, HWND_NOTOPMOST), 0, 0, 0, 0, SWP_NOMOVE)
 End Function
 
 Public Function SetAsForeground(ByVal UserFormCaption As String) As Boolean
-    Dim hwnd As Long: hwnd = GetUserformHwnd(UserFormCaption): If hwnd = 0 Then Exit Function
-    SetAsForeground = CBool(SetForegroundWindow(hwnd))
+    Dim hWnd As Long: hWnd = GetUserformHwnd(UserFormCaption): If hWnd = 0 Then Exit Function
+    SetAsForeground = CBool(SetForegroundWindow(hWnd))
 End Function
 
 Public Function Intersect(ByRef Rect1 As RECT, Rect2 As RECT) As Boolean
@@ -473,17 +482,17 @@ Public Function GetAKeyState(ByVal VKey As VirtualKeyCode) As Boolean
 End Function
 
 Public Function ShowTargetWindow(ByVal UserFormCaption As String, ByVal ShowWindowOption As ShowWindowFlags) As Boolean
-    Dim hwnd As Long: hwnd = GetUserformHwnd(UserFormCaption): If hwnd = 0 Then Exit Function
-    ShowTargetWindow = CBool(ShowWindow(hwnd, ShowWindowOption))
+    Dim hWnd As Long: hWnd = GetUserformHwnd(UserFormCaption): If hWnd = 0 Then Exit Function
+    ShowTargetWindow = CBool(ShowWindow(hWnd, ShowWindowOption))
 End Function
 
 Public Function FlashUserform(ByVal UserFormCaption As String, Optional ByVal dwflags As FlashWindowFlags = FLASHW_ALL) As Boolean
-    Dim hwnd As Long: hwnd = GetUserformHwnd(UserFormCaption): If hwnd = 0 Then Exit Function
-    FlashUserform = FlashWindow(hwnd, dwflags)
+    Dim hWnd As Long: hWnd = GetUserformHwnd(UserFormCaption): If hWnd = 0 Then Exit Function
+    FlashUserform = FlashWindow(hWnd, dwflags)
 End Function
 
-Public Function FlashWin(ByVal hwnd As Long, Optional ByVal dwflags As FlashWindowFlags = FLASHW_ALL) As Boolean
-    FlashWin = FlashWindow(hwnd, dwflags)
+Public Function FlashWin(ByVal hWnd As Long, Optional ByVal dwflags As FlashWindowFlags = FLASHW_ALL) As Boolean
+    FlashWin = FlashWindow(hWnd, dwflags)
 End Function
 
 Public Function AssocQuery(FileExtension As String, Assoc As ASSOCSTR, Optional Flags As ASSOCF, Optional sExtra As String = "open") As String
