@@ -9,11 +9,17 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 
-Private Declare Function GetTickCount Lib "kernel32" () As Long
+#If Win64 And VBA7 Then
+    Private Declare PtrSafe Function GetTickCount64 Lib "kernel32" () As LongPtr
+    Private Previous As LongPtr
+    Private PausedTime As LongPtr
+#Else
+    Private Declare Function GetTickCount Lib "kernel32" () As Long
+    Private Previous As Long
+    Private PausedTime As Long
+#End If
 
 Private StartTime As Date
-Private Previous As Long
-Private PausedTime As Long
 Private Paused As Boolean
 
 Public Function Start()
@@ -27,14 +33,14 @@ End Function
 
 Public Sub Pause()
     If Not Paused Then
-        Previous = GetTickCount
+        Previous = GetTicks
         Paused = True
     End If
 End Sub
 
 Public Sub UnPause()
     If Paused Then
-        PausedTime = PausedTime + Abs(GetTickCount - Previous)
+        PausedTime = PausedTime + Abs(GetTicks - Previous)
         Paused = False
     End If
 End Sub
@@ -47,7 +53,20 @@ Public Function StopTimer() As Date
     StopTimer = Abs((Now() - StartTime) - Ticks2Time(PausedTime))
 End Function
 
-Private Function Ticks2Time(ByVal Ticks As Long) As Date
+#If Win64 And VBA7 Then
+    Private Function Ticks2Time(ByVal Ticks As LongPtr) As Date
+#Else
+    Private Function Ticks2Time(ByVal Ticks As Long) As Date
+#End If
     'Converts ticks to the number of elapsed seconds
     Ticks2Time = (Ticks / 1000) * CDbl(TimeValue("00:00:01"))
+End Function
+
+#If Win64 And VBA7 Then
+    Private Function GetTicks() As LongPtr
+        GetTicks = GetTickCount64
+#Else
+    Private Function GetTicks() As Long
+        GetTicks = GetTickCount
+#End If
 End Function
