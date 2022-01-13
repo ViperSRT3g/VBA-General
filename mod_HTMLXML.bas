@@ -21,13 +21,6 @@ Public Function FilterHTML(ByVal RawHTML As String) As String
     FilterHTML = RawHTML
 End Function
 
-Public Function ParseJSON(ByVal JSON As String) As Object
-    With CreateObject("ScriptControl")
-        .Language = "JScript"
-        Set ParseJSON = .Eval("(" & JSON & ")")
-    End With
-End Function
-
 Public Function GetHTTP(ByVal URL As String) As String
     On Error Resume Next
     With CreateObject("WinHttp.WinHttpRequest.5.1")
@@ -47,7 +40,7 @@ Public Function GetXML(ByVal URL As String) As String
 End Function
 
 Public Function GetHTML(ByVal URL As String) As String
-    On Error GoTo ErrorEscape
+    On Error GoTo ErrorHandler
     Dim IE As Object: Set IE = CreateObject("InternetExplorer.Application")
     Dim HTML As Object
     
@@ -58,18 +51,38 @@ Public Function GetHTML(ByVal URL As String) As String
     GetHTML = HTML.innerHTML
     IE.Quit
     
-ErrorEscape:
+ErrorHandler:
     Set IE = Nothing
     Set HTML = Nothing
 End Function
 
 Public Function CheckHTTP(ByVal URL As String) As Integer
-    On Error GoTo ErrorEscape
+    On Error GoTo ErrorHandler
     Dim URLReq As Object: Set URLReq = CreateObject("WinHttp.WinHttpRequest.5.1")
     If UCase(Left(URL, 4)) <> "HTTP" Then URL = "HTTP://" & URL
     URLReq.Open "GET", URL
     URLReq.Send
     CheckHTTP = CInt(URLReq.Status)
-ErrorEscape:
+ErrorHandler:
     Set URLReq = Nothing
+End Function
+
+Public Function DownloadFileHTTP(ByVal SourceURL As String, ByVal LocalFile As String, Optional ByVal Username As String, Optional ByRef Password As String) As Boolean
+    On Error GoTo ErrorHandler
+    If Len(SourceURL) = 0 Or Len(LocalFile) = 0 Then Exit Function
+    Dim WHTTPReq As Object: Set WHTTPReq = CreateObject("Microsoft.XMLHTTP")
+    WHTTPReq.Open "GET", SourceURL, False, Username, Password
+    WHTTPReq.Send
+    
+    If Not WHTTPReq.Status = 200 Then Exit Function
+    With CreateObject("ADODB.Stream")
+        .Open
+        .Type = 1
+        .Write WHTTPReq.responseBody
+        .SaveToFile LocalFile, 2 ' 1 = no overwrite, 2 = overwrite
+        .Close
+    End With
+    DownloadFileHTTP = CreateObject("Scripting.FileSystemObject").FileExists(LocalFile)
+ErrorHandler:
+    Set WHTTPReq = Nothing
 End Function
