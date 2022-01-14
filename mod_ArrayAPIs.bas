@@ -1,8 +1,8 @@
 Attribute VB_Name = "mod_ArrayAPIs"
 Option Explicit
 
-Public Function IsListed(ByVal Value As Variant, ByRef arr As Variant) As Boolean
-    IsListed = (UBound(Filter(arr, Value)) > -1)
+Public Function IsListed(ByVal Value As Variant, ByRef arr As Variant) As Long
+    IsListed = UBound(Filter(arr, Value)) + 1
 End Function
 
 Public Function IdenticalElements(ByRef arr As Variant) As Boolean
@@ -72,17 +72,17 @@ Public Function RemoveRange(ByRef MainRange As Range, ExcludeRange As Range) As 
 End Function
 
 Public Sub Sort2DArray(ByRef TargetArray As Variant, Optional ByVal SortBothColumns As Boolean)
-    Dim i As Integer, j As Integer, ci As Integer, c As Integer
+    Dim I As Integer, j As Integer, ci As Integer, c As Integer
     Dim temp As Variant
     
     'Bubble sort 1st column
     ci = LBound(TargetArray, 2) '1st column index
-    For i = LBound(TargetArray) To UBound(TargetArray) - 1
-        For j = i + 1 To UBound(TargetArray)
-            If TargetArray(i, ci) < TargetArray(j, ci) Then
+    For I = LBound(TargetArray) To UBound(TargetArray) - 1
+        For j = I + 1 To UBound(TargetArray)
+            If TargetArray(I, ci) < TargetArray(j, ci) Then
                 For c = LBound(TargetArray, 2) To UBound(TargetArray, 2)
-                    temp = TargetArray(i, c)
-                    TargetArray(i, c) = TargetArray(j, c)
+                    temp = TargetArray(I, c)
+                    TargetArray(I, c) = TargetArray(j, c)
                     TargetArray(j, c) = temp
                 Next
             End If
@@ -93,13 +93,13 @@ Public Sub Sort2DArray(ByRef TargetArray As Variant, Optional ByVal SortBothColu
     
     'Bubble sort 2nd column, where adjacent rows in 1st column are equal
     ci = LBound(TargetArray, 2) + 1 '2nd column index
-    For i = LBound(TargetArray) To UBound(TargetArray) - 1
-        For j = i + 1 To UBound(TargetArray)
-            If TargetArray(i, ci - 1) = TargetArray(j, ci - 1) Then 'compare adjacent rows in 1st column
-                If TargetArray(i, ci) < TargetArray(j, ci) Then
+    For I = LBound(TargetArray) To UBound(TargetArray) - 1
+        For j = I + 1 To UBound(TargetArray)
+            If TargetArray(I, ci - 1) = TargetArray(j, ci - 1) Then 'compare adjacent rows in 1st column
+                If TargetArray(I, ci) < TargetArray(j, ci) Then
                     For c = LBound(TargetArray, 2) To UBound(TargetArray, 2)
-                        temp = TargetArray(i, c)
-                        TargetArray(i, c) = TargetArray(j, c)
+                        temp = TargetArray(I, c)
+                        TargetArray(I, c) = TargetArray(j, c)
                         TargetArray(j, c) = temp
                     Next
                 End If
