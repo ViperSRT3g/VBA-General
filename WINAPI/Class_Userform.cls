@@ -60,6 +60,18 @@ Private Const SPI_GETNONCLIENTMETRICS = 41
 
 
 'Notification Icon Styles
+Public Enum KeyFlags
+    KEY_SHIFT = &H1
+    KEY_CTRL = &H2
+    KEY_ALT = &H4
+End Enum
+
+Public Enum MButtonFlags
+    FMBUTTONLEFT = &H1
+    FMBUTTONRIGHT = &H2
+    FMBUTTONMIDDLE = &H4
+End Enum
+
 Public Enum NotificationIconEnum
     NoIcon
     InfoIcon
@@ -143,6 +155,7 @@ Attribute UForm.VB_VarHelpID = -1
     Private EXStyle As Long     'Long Extended window style flag variable
 #End If
 
+Private Form As Object          'Userform Event Action Object
 Private Browser As Object       'WebBrowser Object (Gif Icon)
 Private lShiftLeftPix As Long   'WebBrowser X Offset (Gif Icon)
 Private lShiftTopPix As Long    'WebBrowser Y Offset (Gif Icon)
@@ -150,7 +163,8 @@ Private IconHandle As Long      'Long Handle of the Userform Icon
 Private Transparency As Long    'Userform's Transparency setting
 Private Translucency As Byte    'Userform's Translucency setting
 Private BlankIconPath As String 'Filepath of a given icon file
-
+Private OffsetX As Single
+Private OffsetY As Single
 
 Private IconEnabled_ As Boolean 'Property flag for displaying the icon
 Private WindowBorder_ As Boolean
@@ -163,6 +177,7 @@ Private SystemMenu_ As Boolean
 Private Taskbar_ As Boolean
 Private TopMost_ As Boolean
 Private TooltipWindow_ As Boolean
+Private Draggable_ As Boolean
 
 
 'CLASS PROPERTIES
@@ -171,11 +186,11 @@ Public Property Get IconEnabled() As Boolean
 End Property
 
 #If Win64 And VBA7 Then
-    Public Property Get hWnd() As LongPtr
+    Public Property Get hwnd() As LongPtr
 #Else
-    Public Property Get hWnd() As Long
+    Public Property Get hwnd() As Long
 #End If
-    hWnd = Handle
+    hwnd = Handle
 End Property
 
 Public Property Get WindowBorder() As Boolean
@@ -269,12 +284,21 @@ Public Property Let TooltipWindow(Value As Boolean)
     If Not TooltipWindow_ Then Call RemoveExtWindowStyle(WS_EX_TOOLWINDOW)
 End Property
 
+Public Property Get Draggable() As Boolean
+    Draggable = Draggable_
+End Property
+Public Property Let Draggable(Value As Boolean)
+    Draggable_ = Value
+End Property
+
+
 'CLASS METHODS
 Private Sub Class_Initialize()
 End Sub
 Private Sub Class_Terminate()
     If BHandle > 0 Then Call WINAPI.DestroyWindow_(BHandle)
     Set Browser = Nothing
+    Set Form = Nothing
     Set UForm = Nothing
     Set WINAPI = Nothing
 End Sub
@@ -288,6 +312,18 @@ Public Sub RefreshIcon(Toggle As Boolean)
     If Not Toggle Then Exit Sub
     Call UpdateIcon
 End Sub
+Private Sub UForm_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+    If Button = FMBUTTONLEFT And Draggable_ Then
+        OffsetX = X
+        OffsetY = Y
+    End If
+End Sub
+Private Sub UForm_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+    If Button = FMBUTTONLEFT And Draggable_ Then
+        Form.Left = Form.Left + (X - OffsetX)
+        Form.Top = Form.Top + (Y - OffsetY)
+    End If
+End Sub
 
 
 'PUBLIC SUB/FUNCTIONS
@@ -295,6 +331,7 @@ End Sub
 Public Function SetUserform(TargetUserform As Object) As Boolean
     If TargetUserform Is Nothing Then Exit Function
     Set UForm = TargetUserform 'Set Event Listener
+    Set Form = TargetUserform
     Handle = WINAPI.GetUFHandle(TargetUserform) 'Get Form Handle
     
     'Load Window Styling
@@ -435,8 +472,8 @@ End Function
 Private Function CreateIcon() As Boolean
     Const ICO As String = "0000010001001010020001000100B0000000160000002800000010000000200000000100010000000000000000000000000000000000000000000000000000000000FFFFFF0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000"
     With CreateObject("Scripting.FileSystemObject")
-        Dim d(197) As Byte, i As Long, FP As String: FP = .BuildPath(.GetSpecialFolder(2), "General-VBA\Resources\Blank.ico")
-        If Not .FileExists(FP) Then: For i = 0 To Len(ICO) - 1 Step 2: d(i / 2) = CByte("&H" & Mid(ICO, i + 1, 2)): Next i: i = FreeFile: Open FP For Binary Lock Read Write As i: Put i, , d: Close i
+        Dim d(197) As Byte, I As Long, FP As String: FP = .BuildPath(.GetSpecialFolder(2), "General-VBA\Resources\Blank.ico")
+        If Not .FileExists(FP) Then: For I = 0 To Len(ICO) - 1 Step 2: d(I / 2) = CByte("&H" & Mid(ICO, I + 1, 2)): Next I: I = FreeFile: Open FP For Binary Lock Read Write As I: Put I, , d: Close I
         BlankIconPath = FP: CreateIcon = .FileExists(FP)
     End With
 End Function
