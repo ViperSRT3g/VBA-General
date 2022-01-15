@@ -1,4 +1,4 @@
-#VBA-GENERAL | WINAPI Project
+# VBA-GENERAL | WINAPI Project
 This repo is for developers who want to utlize the WINAPI in their projects. It handles the compatibility between 32-bit and 64-bit systems for you.
 
 ## Dependencies
