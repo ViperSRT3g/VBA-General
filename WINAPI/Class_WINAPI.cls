@@ -573,6 +573,7 @@ End Enum
     Private Declare PtrSafe Function IUnknown_GetWindow Lib "shlwapi" Alias "#172" (ByVal pIUnk As IUnknown, ByVal hUf As LongPtr) As Long
     Private Declare PtrSafe Sub mouse_event Lib "user32" (ByVal dwFlags As MouseEventFlags, ByVal dX As Long, ByVal dY As Long, ByVal dwData As Long, ByVal dwExtraInfo As LongPtr)
     Private Declare PtrSafe Function NormalizeString Lib "Normaliz" (ByVal normForm As Long, ByVal lpSrcString As LongPtr, ByVal cwSrcLength As Long, ByVal lpDstString As LongPtr, ByVal cwDstLength As Long) As Long
+    Private Declare PtrSafe Function ReleaseCapture Lib "user32" () As Long
     Private Declare PtrSafe Function ReleaseDC Lib "user32" (ByVal hwnd As LongPtr, ByVal hDC As LongPtr) As Long
     Private Declare PtrSafe Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hwnd As LongPtr, ByVal wMsg As Long, ByVal wParam As Integer, ByVal lParam As Long) As Long
     Private Declare PtrSafe Function SetCursorPos Lib "user32" (ByVal X As Long, ByVal Y As Long) As Long
@@ -620,6 +621,7 @@ End Enum
     Private Declare Function IUnknown_GetWindow Lib "shlwapi" Alias "#172" (ByVal pIUnk As IUnknown, ByVal hUf As Long) As Long
     Private Declare Sub mouse_event Lib "user32" (ByVal dwFlags As MouseEventFlags, ByVal dX As Long, ByVal dY As Long, ByVal dwData As Long, ByVal dwExtraInfo As Long)
     Private Declare Function NormalizeString Lib "Normaliz" (ByVal normForm As Long, ByVal lpSrcString As Long, ByVal cwSrcLength As Long, ByVal lpDstString As Long, ByVal cwDstLength As Long) As Long
+    Private Declare Function ReleaseCapture Lib "user32" Alias "ReleaseCapture" () As Long
     Private Declare Function ReleaseDC Lib "user32" (ByVal hwnd As Long, ByVal hdc As Long) As Long
     Private Declare Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hwnd As Long, ByVal wMsg As Long, ByVal wParam As Integer, ByVal lParam As Long) As Long
     Private Declare Function SetCursorPos Lib "user32" (ByVal X As Long, ByVal Y As Long) As Long
@@ -988,6 +990,10 @@ End Function
         PtrStr = PtrStr & BufferStr
         Offset = Offset + 2
     Loop Until Buffer(0) = 0 And Buffer(1) = 0
+End Function
+
+Public Function ReleaseCapture_() As Long
+    ReleaseCapture_ = ReleaseCapture
 End Function
 
 #If Win64 And VBA7 Then

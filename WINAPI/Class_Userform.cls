@@ -163,8 +163,6 @@ Private IconHandle As Long      'Long Handle of the Userform Icon
 Private Transparency As Long    'Userform's Transparency setting
 Private Translucency As Byte    'Userform's Translucency setting
 Private BlankIconPath As String 'Filepath of a given icon file
-Private OffsetX As Single
-Private OffsetY As Single
 
 Private IconEnabled_ As Boolean 'Property flag for displaying the icon
 Private WindowBorder_ As Boolean
@@ -312,16 +310,12 @@ Public Sub RefreshIcon(Toggle As Boolean)
     If Not Toggle Then Exit Sub
     Call UpdateIcon
 End Sub
-Private Sub UForm_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
-    If Button = FMBUTTONLEFT And Draggable_ Then
-        OffsetX = X
-        OffsetY = Y
-    End If
-End Sub
 Private Sub UForm_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+    Const WM_NCLBUTTONDOWN = &HA1
+    Const HTCAPTION = 2
     If Button = FMBUTTONLEFT And Draggable_ Then
-        Form.Left = Form.Left + (X - OffsetX)
-        Form.Top = Form.Top + (Y - OffsetY)
+        Call WINAPI.ReleaseCapture_
+        Call WINAPI.SendMessage_(Handle, WM_NCLBUTTONDOWN, HTCAPTION, 0)
     End If
 End Sub
 
