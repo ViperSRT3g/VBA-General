@@ -164,7 +164,8 @@ Private Transparency As Long    'Userform's Transparency setting
 Private Translucency As Byte    'Userform's Translucency setting
 Private BlankIconPath As String 'Filepath of a given icon file
 
-Private IconEnabled_ As Boolean 'Property flag for displaying the icon
+'Property flags
+Private IconEnabled_ As Boolean
 Private WindowBorder_ As Boolean
 Private WindowCaption_ As Boolean
 Private WindowEdge_ As Boolean
