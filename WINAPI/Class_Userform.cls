@@ -518,31 +518,6 @@ Private Function GetRGB() As String
     GetRGB = "#" & Right("0" & Hex(&HFF& And Color), 2) & Right("0" & Hex((&HFF00& And Color) \ 256), 2) & Right("0" & Hex((&HFF0000 And Color) \ 65536), 2)
 End Function
 
-'Updates the form window styles for commonly used features
-Private Sub UpdateFormAppearance()
-    If Handle = 0 Then Exit Sub
-    WStyle = WINAPI.GetWindowLong_(Handle, GWL_STYLE)
-    EXStyle = WINAPI.GetWindowLong_(Handle, GWL_EXSTYLE)
-    
-    WStyle = IIf(WindowBorder_, WStyle Or WS_BORDER, WStyle And Not WS_BORDER)
-    WStyle = IIf(WindowCaption_, WStyle Or WS_CAPTION, WStyle And Not WS_CAPTION)
-    WStyle = IIf(MaximizeBox_, WStyle Or WS_MAXIMIZEBOX, WStyle And Not WS_MAXIMIZEBOX)
-    WStyle = IIf(MinimizeBox_, WStyle Or WS_MINIMIZEBOX, WStyle And Not WS_MINIMIZEBOX)
-    WStyle = IIf(Resizable_, WStyle Or WS_SIZEBOX, WStyle And Not WS_SIZEBOX)
-    WStyle = IIf(SystemMenu_, WStyle Or WS_SYSMENU, WStyle And Not WS_SYSMENU)
-    
-    EXStyle = IIf(Taskbar_, EXStyle Or WS_EX_APPWINDOW, EXStyle And Not WS_EX_APPWINDOW)
-    EXStyle = IIf(TopMost_, EXStyle Or WS_EX_TOPMOST, EXStyle And Not WS_EX_TOPMOST)
-    EXStyle = IIf(TooltipWindow_, EXStyle Or WS_EX_TOOLWINDOW, EXStyle And Not WS_EX_TOOLWINDOW)
-    
-    Call WINAPI.ShowWindow_(Handle, SW_HIDE)
-    Call WINAPI.SetWindowLong_(Handle, GWL_STYLE, WStyle)
-    Call WINAPI.SetWindowLong_(Handle, GWL_EXSTYLE, EXStyle)
-    Call WINAPI.ShowWindow_(Handle, SW_SHOW)
-    Call WINAPI.SetWindowPos_(Handle, IIf(TopMost_, HWND_TOPMOST, HWND_NOTOPMOST), 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE)
-    Call WINAPI.DrawMenuBar_(Handle)
-End Sub
-
 'Updates the position and background color of the browser window for the gif icon
 Private Sub UpdateIcon()
     If Handle = 0 Or BHandle = 0 Then Exit Sub
