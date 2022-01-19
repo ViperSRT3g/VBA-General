@@ -77,16 +77,16 @@ End Function
 'Adjust RowCount based on how many columns of data your worksheet has
 Public Function BatchLoad(TSheet As Worksheet, Optional RowCount As Long = 1000) As Variant
     If TSheet Is Nothing Then Exit Function
-    Dim Output() As Variant: ReDim Output(Application.WorksheetFunction.RoundDown(TSheet.UsedRange.Rows.Count / RowCount, 0) - 1) As Variant
+    Dim Output() As Variant: ReDim Output(Application.WorksheetFunction.RoundDown(TSheet.usedRange.Rows.Count / RowCount, 0) - 1) As Variant
     Dim Index As Long, RowC As Long: RowC = 2
     Dim FCell As Range, LCell As Range
     For Index = LBound(Output, 1) To UBound(Output, 1)
         If Index = UBound(Output, 1) Then
             Set FCell = TSheet.Cells(RowC, 1)
-            Set LCell = TSheet.Cells(TSheet.UsedRange.Rows.Count, TSheet.UsedRange.Columns.Count)
+            Set LCell = TSheet.Cells(TSheet.usedRange.Rows.Count, TSheet.usedRange.Columns.Count)
         Else
             Set FCell = TSheet.Cells(RowC, 1): RowC = RowC + RowCount - 1
-            Set LCell = TSheet.Cells(RowC, TSheet.UsedRange.Columns.Count): RowC = RowC + 1
+            Set LCell = TSheet.Cells(RowC, TSheet.usedRange.Columns.Count): RowC = RowC + 1
         End If
         Output(Index) = TSheet.Range(FCell, LCell)
     Next Index
@@ -117,9 +117,9 @@ End Function
 
 'Returns a shape object containing the added picture
 Public Function AddPicture(TargetSheet As Worksheet, Path As String, Left As Single, Top As Single, _
-                           width As Single, height As Single, Optional ShapeName As String) As Shape
+                           Width As Single, Height As Single, Optional ShapeName As String) As Shape
     If TargetSheet Is Nothing Or Len(Path) = 0 Then Exit Function
-    Set AddPicture = TargetSheet.Shapes.AddPicture(Path, msoFalse, msoTrue, Left, Top, width, height)
+    Set AddPicture = TargetSheet.Shapes.AddPicture(Path, msoFalse, msoTrue, Left, Top, Width, Height)
     If Len(ShapeName) > 0 Then AddPicture.Name = ShapeName
 End Function
 
@@ -171,7 +171,7 @@ End Function
 'Returns boolean if a given worksheet exists in a given workbook
 Public Function SheetExists(ByVal SheetName As String, Optional ByRef WB As Workbook) As Boolean
     On Error Resume Next
-    If WB Is Nothing Then Set WB = ActiveWorkbook
+    If WB Is Nothing Then Set WB = ThisWorkbook
     SheetExists = Not WB.Worksheets(SheetName) Is Nothing
 End Function
 
@@ -189,17 +189,20 @@ End Function
 'WORKBOOK FUNCTIONS
 'Returns boolean if a given workbook is password protected
 Public Function IsWBProtected(ByRef TWB As Workbook) As Boolean
+    If TWB Is Nothing Then Exit Function
     IsWBProtected = TWB.ProtectWindows Or TWB.ProtectStructure
 End Function
 
 'Returns boolean if a given worksheet is password protected
 Public Function IsWSProtected(ByRef TWS As Worksheet) As Boolean
+    If TWS Is Nothing Then Exit Function
     IsWSProtected = TWS.ProtectContents Or TWS.ProtectDrawingObjects Or TWS.ProtectScenarios
 End Function
 
 'Returns boolean if a given workbook is currently open
 Public Function IsWorkBookOpen(ByVal WorkbookName As String) As Boolean
     On Error GoTo ErrorHandler
+    If Len(WorkbookName) = 0 Then Exit Function
     Dim WBO As Workbook: Set WBO = Workbooks(WorkbookName)
     IsWorkBookOpen = Not WBO Is Nothing
 ErrorHandler:
@@ -208,9 +211,13 @@ End Function
 
 'Returns a workbook object based on a matching name search
 Public Function FindWorkbook(ByVal WorkbookName As String) As Workbook
+    If Len(WorkbookName) = 0 Then Exit Function
     Dim Index As Long
     For Index = 1 To Workbooks.Count
-        If Workbooks(Index).Name Like "*" & WorkbookName & "*" Then Set FindWorkbook = Workbooks(Index)
+        If Workbooks(Index).Name Like "*" & WorkbookName & "*" Then
+            Set FindWorkbook = Workbooks(Index)
+            Exit Function
+        End If
     Next Index
 End Function
 
@@ -236,6 +243,7 @@ End Function
 'SUBROUTINES
 'Unmerges a given range of cells, and fills each cell with the originally merged data
 Public Sub UnmergeAndFill(ByRef WorkArea As Range)
+    If WorkArea Is Nothing Then Exit Sub
     Dim TCell As Range, MAddress As String, MVal As String
     For Each TCell In WorkArea.SpecialCells(xlCellTypeConstants, xlLogical + xlNumbers + xlTextValues).Cells
         If TCell.MergeCells Then
