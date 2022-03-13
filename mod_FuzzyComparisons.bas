@@ -7,8 +7,12 @@ Public Function NGramScore(ByVal Str1 As String, Str2 As String) As Single
     Dim Score1 As Object: Set Score1 = GenNGram(Str1): If Score1 Is Nothing Then Exit Function
     Dim Score2 As Object: Set Score2 = GenNGram(Str2): If Score2 Is Nothing Then Set Score1 = Nothing: Exit Function
     Dim Index As Long
-    For Index = 0 To Score1.Count - 1: If InStr(1, Str2, Score1.Keys()(Index)) Then NGramScore = NGramScore + 1: Next Index
-    For Index = 0 To Score2.Count - 1: If InStr(1, Str1, Score2.Keys()(Index)) Then NGramScore = NGramScore + 1: Next Index
+    For Index = 0 To Score1.Count - 1
+        If InStr(1, Str2, Score1.Keys()(Index)) Then NGramScore = NGramScore + 1
+    Next Index
+    For Index = 0 To Score2.Count - 1
+        If InStr(1, Str1, Score2.Keys()(Index)) Then NGramScore = NGramScore + 1
+    Next Index
     NGramScore = NGramScore / (Score1.Count + Score2.Count)
     Set Score1 = Nothing: Set Score2 = Nothing
 End Function
