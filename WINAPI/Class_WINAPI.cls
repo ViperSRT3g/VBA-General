@@ -94,8 +94,8 @@ Private Type NONCLIENTMETRICS
 End Type
 
 Private Type POINTAPI
-    x As Long
-    y As Long
+    X As Long
+    Y As Long
 End Type
 
 Private Type RECT
@@ -540,53 +540,53 @@ Public Enum WindowStyleFlags
     WS_VISIBLE = &H10000000     'The window is initially visible. This style can be turned on and off by using the ShowWindow or SetWindowPos function.
 End Enum
 
-
+'WINAPI DECLARATIONS
 #If Win64 And VBA7 Then
-    Private Declare PtrSafe Function AssocQueryStringW Lib "shlwapi.dll" (ByVal flags As ASSOCF, ByVal Str As ASSOCSTR, ByVal pszAssoc As Long, ByVal pszExtra As Long, ByVal pszOut As Long, ByRef pcchOut As Long) As Long
-    Private Declare PtrSafe Function AtlAxGetControl Lib "atl" (ByVal hWnd As LongPtr, Unk As stdole.IUnknown) As Long
+    Private Declare PtrSafe Function AssocQueryStringW Lib "shlwapi.dll" (ByVal flags As ASSOCF, ByVal Str As ASSOCSTR, ByVal pszAssoc As LongPtr, ByVal pszExtra As LongPtr, ByVal pszOut As LongPtr, ByRef pcchOut As Long) As Long
+    Private Declare PtrSafe Function AtlAxGetControl Lib "atl" (ByVal hwnd As LongPtr, Unk As stdole.IUnknown) As Long
     Private Declare PtrSafe Function AtlAxWinInit Lib "Atl.dll" () As Long
-    Private Declare PtrSafe Function CallWindowProc Lib "user32" Alias "CallWindowProcA" (ByVal lpPrevWndFunc As LongPtr, ByVal hWnd As LongPtr, ByVal Msg As Long, ByVal wParam As LongPtr, ByVal lParam As LongPtr) As LongPtr
+    Private Declare PtrSafe Function CallWindowProc Lib "user32" Alias "CallWindowProcA" (ByVal lpPrevWndFunc As LongPtr, ByVal hwnd As LongPtr, ByVal Msg As Long, ByVal wParam As LongPtr, ByVal lParam As LongPtr) As LongPtr
     Private Declare PtrSafe Function ColorHLSToRGB Lib "shlwapi.dll" (ByVal wHue As Integer, ByVal wLuminance As Integer, ByVal wSaturation As Integer) As Long
     Private Declare PtrSafe Function ColorRGBToHLS Lib "shlwapi" (ByVal clrRGB As Long, ByRef wHue As Integer, ByRef wLuminance As Integer, ByRef wSaturation As Integer) As Long
     Private Declare PtrSafe Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (Destination As Any, Source As Any, ByVal Length As Long)
-    Private Declare PtrSafe Function CreateWindowEx Lib "user32" Alias "CreateWindowExA" (ByVal dwExStyle As ExtendedWindowStyleFlags, ByVal lpClassName As String, ByVal lpWindowName As String, ByVal dwStyle As WindowStyleFlags, ByVal x As Long, ByVal y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal HwndParent As LongPtr, ByVal hMenu As LongPtr, ByVal hInstance As LongPtr, lpParam As Any) As LongPtr
-    Private Declare PtrSafe Function DestroyWindow Lib "user32" (ByVal hWnd As LongPtr) As Long
-    Private Declare PtrSafe Function DrawMenuBar Lib "user32" (ByVal hWnd As LongPtr) As Long
+    Private Declare PtrSafe Function CreateWindowEx Lib "user32" Alias "CreateWindowExA" (ByVal dwExStyle As ExtendedWindowStyleFlags, ByVal lpClassName As String, ByVal lpWindowName As String, ByVal dwStyle As WindowStyleFlags, ByVal X As Long, ByVal Y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal HwndParent As LongPtr, ByVal hMenu As LongPtr, ByVal hInstance As LongPtr, lpParam As Any) As LongPtr
+    Private Declare PtrSafe Function DestroyWindow Lib "user32" (ByVal hwnd As LongPtr) As Long
+    Private Declare PtrSafe Function DrawMenuBar Lib "user32" (ByVal hwnd As LongPtr) As Long
     Private Declare PtrSafe Function ExtractIcon Lib "shell32.dll" Alias "ExtractIconA" (ByVal hInst As Long, ByVal lpszExeFileName As String, ByVal nIconIndex As Long) As Long
     Private Declare PtrSafe Function FindExecutable Lib "shell32.dll" Alias "FindExecutableA" (ByVal lpFile As String, ByVal lpDirectory As String, ByVal lpResult As String) As LongPtr
     Private Declare PtrSafe Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As LongPtr
-    Private Declare PtrSafe Function FlashWindow Lib "user32" (ByVal hWnd As LongPtr, ByVal dwFlags As FlashWindowFlags) As Long
+    Private Declare PtrSafe Function FlashWindow Lib "user32" (ByVal hwnd As LongPtr, ByVal dwFlags As FlashWindowFlags) As Long
     Private Declare PtrSafe Function FoldString Lib "kernel32" Alias "FoldStringA" (ByVal dwMapFlags As FoldStringMapFlags, ByVal lpSrcStr As LongPtr, ByVal cchSrc As Long, ByVal lpDestStr As LongPtr, ByVal cchdest As Long) As Long
     Private Declare PtrSafe Function GetAsyncKeyState Lib "user32" (ByVal VKey As VirtualKeyCode) As Long
     Private Declare PtrSafe Function GetCursorPos Lib "user32" (lpPoint As POINTAPI) As Long
-    Private Declare PtrSafe Function GetDC Lib "user32" (ByVal hWnd As LongPtr) As LongPtr
+    Private Declare PtrSafe Function GetDC Lib "user32" (ByVal hwnd As LongPtr) As LongPtr
     Private Declare PtrSafe Function GetDeviceCaps Lib "gdi32" (ByVal hDC As LongPtr, ByVal nIndex As GetDeviceCapsEnum) As Long
     Private Declare PtrSafe Function GetFocus Lib "user32" () As LongPtr
     Private Declare PtrSafe Function GetForegroundWindow Lib "user32" () As LongPtr
     Private Declare PtrSafe Function GetModuleHandle Lib "kernel32" Alias "GetModuleHandleA" (ByVal lpModuleName As String) As LongPtr
-    Private Declare PtrSafe Function GetNextWindow Lib "user32" Alias "GetWindow" (ByVal hWnd As LongPtr, ByVal wFlag As GetWindowCmd) As LongPtr
-    Private Declare PtrSafe Function GetPixel Lib "gdi32" (ByVal hDC As LongPtr, ByVal x As Long, ByVal y As Long) As Long
-    Private Declare PtrSafe Function GetProp Lib "user32" Alias "GetPropA" (ByVal hWnd As LongPtr, ByVal lpString As String) As LongPtr
+    Private Declare PtrSafe Function GetNextWindow Lib "user32" Alias "GetWindow" (ByVal hwnd As LongPtr, ByVal wFlag As GetWindowCmd) As LongPtr
+    Private Declare PtrSafe Function GetPixel Lib "gdi32" (ByVal hDC As LongPtr, ByVal X As Long, ByVal Y As Long) As Long
+    Private Declare PtrSafe Function GetProp Lib "user32" Alias "GetPropA" (ByVal hwnd As LongPtr, ByVal lpString As String) As LongPtr
     Private Declare PtrSafe Function GetTickCount64 Lib "kernel32" () As LongPtr
-    Private Declare PtrSafe Function GetWindow Lib "user32.dll" (ByVal hWnd As LongPtr, ByVal uCmd As GetWindowCmd) As LongPtr
-    Private Declare PtrSafe Function GetWindowLongPtr Lib "user32" Alias "GetWindowLongPtrA" (ByVal hWnd As LongPtr, ByVal nIndex As GetWindowLongEnum) As LongPtr
-    Private Declare PtrSafe Function GetWindowRect Lib "user32" (ByVal hWnd As LongPtr, lpRect As RECT) As Long
+    Private Declare PtrSafe Function GetWindow Lib "user32.dll" (ByVal hwnd As LongPtr, ByVal uCmd As GetWindowCmd) As LongPtr
+    Private Declare PtrSafe Function GetWindowLongPtr Lib "user32" Alias "GetWindowLongPtrA" (ByVal hwnd As LongPtr, ByVal nIndex As GetWindowLongEnum) As LongPtr
+    Private Declare PtrSafe Function GetWindowRect Lib "user32" (ByVal hwnd As LongPtr, lpRect As RECT) As Long
     Private Declare PtrSafe Function IntersectRect Lib "user32" (lpDestRect As RECT, lpSrc1Rect As RECT, lpSrc2Rect As RECT) As Long
     Private Declare PtrSafe Function IUnknown_GetWindow Lib "shlwapi" Alias "#172" (ByVal pIUnk As IUnknown, ByVal hUf As LongPtr) As Long
     Private Declare PtrSafe Sub mouse_event Lib "user32" (ByVal dwFlags As MouseEventFlags, ByVal dX As Long, ByVal dY As Long, ByVal dwData As Long, ByVal dwExtraInfo As LongPtr)
     Private Declare PtrSafe Function NormalizeString Lib "Normaliz" (ByVal normForm As Long, ByVal lpSrcString As LongPtr, ByVal cwSrcLength As Long, ByVal lpDstString As LongPtr, ByVal cwDstLength As Long) As Long
     Private Declare PtrSafe Function ReleaseCapture Lib "user32" () As Long
-    Private Declare PtrSafe Function ReleaseDC Lib "user32" (ByVal hWnd As LongPtr, ByVal hDC As LongPtr) As Long
-    Private Declare PtrSafe Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hWnd As LongPtr, ByVal wMsg As Long, ByVal wParam As Integer, ByVal lParam As Long) As Long
-    Private Declare PtrSafe Function SetCursorPos Lib "user32" (ByVal x As Long, ByVal y As Long) As Long
-    Private Declare PtrSafe Function SetForegroundWindow Lib "user32" (ByVal hWnd As LongPtr) As Long
-    Private Declare PtrSafe Function SetLayeredWindowAttributes Lib "user32.dll" (ByVal hWnd As LongPtr, ByVal crKey As Long, ByVal bAlpha As Byte, ByVal dwFlags As Long) As Long
-    Private Declare PtrSafe Function SetProp Lib "user32" Alias "SetPropA" (ByVal hWnd As LongPtr, ByVal lpString As String, ByVal hData As LongPtr) As Long
-    Private Declare PtrSafe Function SetWindowLongPtr Lib "user32" Alias "SetWindowLongPtrA" (ByVal hWnd As LongPtr, ByVal nIndex As GetWindowLongEnum, ByVal dwNewLong As LongPtr) As LongPtr
-    Private Declare PtrSafe Function SetWindowPos Lib "user32" (ByVal hWnd As LongPtr, ByVal hWndInsertAfter As hWndInsertAfterEnum, ByVal x As Long, ByVal y As Long, ByVal cX As Long, ByVal cY As Long, ByVal wFlags As SetWindowPositionFlags) As Boolean
-    Private Declare PtrSafe Function SetWindowText Lib "user32" Alias "SetWindowTextA" (ByVal hWnd As LongPtr, ByVal lpString As String) As Long
-    Private Declare PtrSafe Function ShellExecute Lib "shell32.dll" Alias "ShellExecuteA" (ByVal hWnd As LongPtr, ByVal lpOperation As String, ByVal lpFile As String, ByVal lpParameters As String, ByVal lpDirectory As String, ByVal nShowCmd As Long) As LongPtr
-    Private Declare PtrSafe Function ShowWindow Lib "user32" (ByVal hWnd As LongPtr, ByVal nCmdShow As ShowWindowFlags) As Long
+    Private Declare PtrSafe Function ReleaseDC Lib "user32" (ByVal hwnd As LongPtr, ByVal hDC As LongPtr) As Long
+    Private Declare PtrSafe Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hwnd As LongPtr, ByVal wMsg As Long, ByVal wParam As Integer, ByVal lParam As Long) As Long
+    Private Declare PtrSafe Function SetCursorPos Lib "user32" (ByVal X As Long, ByVal Y As Long) As Long
+    Private Declare PtrSafe Function SetForegroundWindow Lib "user32" (ByVal hwnd As LongPtr) As Long
+    Private Declare PtrSafe Function SetLayeredWindowAttributes Lib "user32.dll" (ByVal hwnd As LongPtr, ByVal crKey As Long, ByVal bAlpha As Byte, ByVal dwFlags As Long) As Long
+    Private Declare PtrSafe Function SetProp Lib "user32" Alias "SetPropA" (ByVal hwnd As LongPtr, ByVal lpString As String, ByVal hData As LongPtr) As Long
+    Private Declare PtrSafe Function SetWindowLongPtr Lib "user32" Alias "SetWindowLongPtrA" (ByVal hwnd As LongPtr, ByVal nIndex As GetWindowLongEnum, ByVal dwNewLong As LongPtr) As LongPtr
+    Private Declare PtrSafe Function SetWindowPos Lib "user32" (ByVal hwnd As LongPtr, ByVal hWndInsertAfter As hWndInsertAfterEnum, ByVal X As Long, ByVal Y As Long, ByVal cX As Long, ByVal cY As Long, ByVal wFlags As SetWindowPositionFlags) As Boolean
+    Private Declare PtrSafe Function SetWindowText Lib "user32" Alias "SetWindowTextA" (ByVal hwnd As LongPtr, ByVal lpString As String) As Long
+    Private Declare PtrSafe Function ShellExecute Lib "shell32.dll" Alias "ShellExecuteA" (ByVal hwnd As LongPtr, ByVal lpOperation As String, ByVal lpFile As String, ByVal lpParameters As String, ByVal lpDirectory As String, ByVal nShowCmd As Long) As LongPtr
+    Private Declare PtrSafe Function ShowWindow Lib "user32" (ByVal hwnd As LongPtr, ByVal nCmdShow As ShowWindowFlags) As Long
     Private Declare PtrSafe Function sndPlaySound32 Lib "winmm.dll" Alias "sndPlaySoundA" (ByVal lpszSoundName As String, ByVal uFlags As PlaySoundOptions) As Long
     Private Declare PtrSafe Function SystemParametersInfo Lib "user32" Alias "SystemParametersInfoA" (ByVal uAction As Long, ByVal uParam As Long, ByRef lpvParam As Any, ByVal fuWinIni As Long) As Long
     Private Declare PtrSafe Function URLDownloadToFile Lib "urlmon" Alias "URLDownloadToFileA" (ByVal pCaller As Long, ByVal szURL As String, ByVal szFileName As String, ByVal dwReserved As Long, ByVal lpfnCB As Long) As Long
@@ -651,9 +651,6 @@ Private Sub Class_Initialize()
         If Not .FolderExists(.BuildPath(.GetSpecialFolder(2), "General-VBA\Resources")) Then .CreateFolder .BuildPath(.GetSpecialFolder(2), "General-VBA\Resources")
     End With
 End Sub
-Private Sub Class_Terminate()
-End Sub
-
 'PRIVATE FUNCTIONS
 'This method assures the required redirection for both the remote varType and the remote value at the same time thus removing any additional stack frames
 'It can be used to both read from and write to memory by swapping the order of the last 2 parameters
@@ -697,21 +694,21 @@ Public Function AssocQuery(FileExtension As String, Assoc As ASSOCSTR, Optional 
 End Function
 
 #If Win64 And VBA7 Then
-    Public Function AtlAxGetControl_(ByVal hWnd As LongPtr, Unk As stdole.IUnknown) As Long
+    Public Function AtlAxGetControl_(ByVal hwnd As LongPtr, Unk As stdole.IUnknown) As Long
 #Else
-    Public Function AtlAxGetControl_(ByVal hWnd As Long, Unk As stdole.IUnknown) As Long
+    Public Function AtlAxGetControl_(ByVal hwnd As Long, Unk As stdole.IUnknown) As Long
 #End If
-    AtlAxGetControl_ = AtlAxGetControl(hWnd, Unk)
+    AtlAxGetControl_ = AtlAxGetControl(hwnd, Unk)
 End Function
 
 Public Function AtlAxWinInit_() As Long: AtlAxWinInit_ = AtlAxWinInit: End Function
 
 #If Win64 And VBA7 Then
-    Public Function CallWindowProc_(ByVal lpPrevWndFunc As LongPtr, ByVal hWnd As LongPtr, ByVal Msg As Long, ByVal wParam As LongPtr, ByVal lParam As LongPtr) As LongPtr
+    Public Function CallWindowProc_(ByVal lpPrevWndFunc As LongPtr, ByVal hwnd As LongPtr, ByVal Msg As Long, ByVal wParam As LongPtr, ByVal lParam As LongPtr) As LongPtr
 #Else
-    Public Function CallWindowProc_(ByVal lpPrevWndFunc As Long, ByVal hWnd As Long, ByVal Msg As Long, ByVal wParam As Long, ByVal lParam As Long) As Long
+    Public Function CallWindowProc_(ByVal lpPrevWndFunc As Long, ByVal hwnd As Long, ByVal Msg As Long, ByVal wParam As Long, ByVal lParam As Long) As Long
 #End If
-    CallWindowProc_ = CallWindowProc(lpPrevWndFunc, hWnd, Msg, wParam, lParam)
+    CallWindowProc_ = CallWindowProc(lpPrevWndFunc, hwnd, Msg, wParam, lParam)
 End Function
 
 'Normalizes and converts unicode characters to their transliterated English equivalents
@@ -733,22 +730,22 @@ Public Function ColorRGBToHLS_(clrRGB As Long, wHue As Integer, wLuminance As In
 
 #If Win64 And VBA7 Then
     Public Function CreateWindowEx_(dwExStyle As ExtendedWindowStyleFlags, lpClassName As String, lpWindowName As String, dwStyle As WindowStyleFlags, _
-                                    x As Long, y As Long, nWidth As Long, nHeight As Long, _
+                                    X As Long, Y As Long, nWidth As Long, nHeight As Long, _
                                     HwndParent As LongPtr, hMenu As LongPtr, hInstance As LongPtr, ByVal lpParam As LongPtr) As LongPtr
 #Else
     Public Function CreateWindowEx_(dwExStyle As ExtendedWindowStyleFlags, lpClassName As String, lpWindowName As String, dwStyle As WindowStyleFlags, _
-                                    x As Long, y As Long, nWidth As Long, nHeight As Long, _
+                                    X As Long, Y As Long, nWidth As Long, nHeight As Long, _
                                     HwndParent As Long, hMenu As Long, hInstance As Long, ByVal lpParam As Long) As Long
 #End If
-    CreateWindowEx_ = CreateWindowEx(dwExStyle, lpClassName, lpWindowName, dwStyle, x, y, nWidth, nHeight, HwndParent, hMenu, hInstance, lpParam)
+    CreateWindowEx_ = CreateWindowEx(dwExStyle, lpClassName, lpWindowName, dwStyle, X, Y, nWidth, nHeight, HwndParent, hMenu, hInstance, lpParam)
 End Function
 
 #If Win64 And VBA7 Then
-    Public Function DestroyWindow_(hWnd As LongPtr) As Long
+    Public Function DestroyWindow_(hwnd As LongPtr) As Long
 #Else
-    Public Function DestroyWindow_(hWnd As Long) As Long
+    Public Function DestroyWindow_(hwnd As Long) As Long
 #End If
-    DestroyWindow_ = DestroyWindow(hWnd)
+    DestroyWindow_ = DestroyWindow(hwnd)
 End Function
 
 Public Function DownloadFile(SourceURL As String, LocalFile As String) As Boolean
@@ -758,11 +755,33 @@ Public Function DownloadFile(SourceURL As String, LocalFile As String) As Boolea
 End Function
 
 #If Win64 And VBA7 Then
-    Public Function DrawMenuBar_(hWnd As LongPtr)
+    Public Function DrawMenuBar_(hwnd As LongPtr)
 #Else
-    Public Function DrawMenuBar_(hWnd As Long)
+    Public Function DrawMenuBar_(hwnd As Long)
 #End If
-    DrawMenuBar_ = DrawMenuBar(hWnd)
+    DrawMenuBar_ = DrawMenuBar(hwnd)
+End Function
+
+'Returns TRUE if a process with a given name is successfully terminated
+'NOTE: Terminates ALL instances of a given process name
+Public Function EndProcess(Optional ProcessName As String) As Boolean
+    Dim ProcList As Collection
+    If Len(ProcessName) > 0 Then
+        Set ProcList = GetProcessList(ProcessName)
+    Else
+        Set ProcList = GetProcessList()
+    End If
+    If ProcList Is Nothing Then Exit Function
+    
+    Dim Output As Long, Process As Object
+    
+    For Each Process In ProcList
+        If CBool(Process.Terminate = 0) Then Output = Output + 1
+    Next Process
+    
+    Set Process = Nothing
+    Set ProcList = Nothing
+    EndProcess = Output > 0
 End Function
 
 Public Function ExtractIcon_(hInst As Long, lpszExeFileName As String, nIconIndex As Long) As Long
@@ -782,15 +801,15 @@ End Function
 #Else
     Public Function FindWindow_(lpClassName As String, lpWindowName As String) As Long
 #End If
-    FindWindow_ FindWindow(lpClassName, lpWindowName)
+    FindWindow_ = FindWindow(lpClassName, lpWindowName)
 End Function
 
 #If Win64 And VBA7 Then
-    Public Function FlashWindow_(hWnd As LongPtr, dwFlags As FlashWindowFlags) As Long
+    Public Function FlashWindow_(hwnd As LongPtr, dwFlags As FlashWindowFlags) As Long
 #Else
-    Public Function FlashWindow_(hWnd As Long, dwFlags As FlashWindowFlags) As Long
+    Public Function FlashWindow_(hwnd As Long, dwFlags As FlashWindowFlags) As Long
 #End If
-    FlashWindow_ = FlashWindow(hWnd, dwFlags)
+    FlashWindow_ = FlashWindow(hwnd, dwFlags)
 End Function
 
 Public Function GetAsyncKeyState_(VKey As VirtualKeyCode) As Long
@@ -808,11 +827,11 @@ End Function
 End Function
 
 #If Win64 And VBA7 Then
-    Public Function GetDC_(hWnd As LongPtr) As LongPtr
+    Public Function GetDC_(hwnd As LongPtr) As LongPtr
 #Else
-    Public Function GetDC_(hWnd As Long) As Long
+    Public Function GetDC_(hwnd As Long) As Long
 #End If
-    GetDC_ = GetDC(hWnd)
+    GetDC_ = GetDC(hwnd)
 End Function
 
 #If Win64 And VBA7 Then
@@ -846,7 +865,7 @@ End Function
     Public Function GetHandleFromPoint(PointPtr As Long) As Long
     Dim Point As POINTAPI
     Call CopyUDT(PointPtr, VarPtr(Point), LenB(Point))
-    GetHandleFromPoint = WindowFromPoint(Point.x, Point.y)
+    GetHandleFromPoint = WindowFromPoint(Point.X, Point.Y)
 #End If
 End Function
 
@@ -859,19 +878,40 @@ End Function
 End Function
 
 #If Win64 And VBA7 Then
-    Public Function GetNextWindow_(hWnd As LongPtr, wFlag As Long) As LongPtr
+    Public Function GetNextWindow_(hwnd As LongPtr, wFlag As Long) As LongPtr
 #Else
-    Public Function GetNextWindow_(hWnd As Long, wFlag As Long) As Long
+    Public Function GetNextWindow_(hwnd As Long, wFlag As Long) As Long
 #End If
-    GetNextWindow_ = GetNextWindow(hWnd, wFlag)
+    GetNextWindow_ = GetNextWindow(hwnd, wFlag)
 End Function
 
 #If Win64 And VBA7 Then
-    Public Function GetPixel_(hDC As LongPtr, x As Long, y As Long) As Long
+    Public Function GetPixel_(hDC As LongPtr, X As Long, Y As Long) As Long
 #Else
-    Public Function GetPixel_(hDC As Long, x As Long, y As Long) As Long
+    Public Function GetPixel_(hDC As Long, X As Long, Y As Long) As Long
 #End If
-    GetPixel_ = GetPixel(hDC, x, y)
+    GetPixel_ = GetPixel(hDC, X, Y)
+End Function
+
+'Returns a Collection of Processes based on a given Process name
+'Returns a Collection of All Processes if no Process name is given
+Public Function GetProcessList(Optional ProcessName As String) As Collection
+    Dim WhereArg As String: WhereArg = IIf(Len(ProcessName) > 0, " WHERE Name LIKE '" & ProcessName & "'", vbNullString)
+    Dim WIN_Services As Object: Set WIN_Services = GetObject("winmgmts:\\.\root\CIMV2")
+    If WIN_Services Is Nothing Then Exit Function
+    
+    Dim WIN_ProcessSet As Object: Set WIN_ProcessSet = WIN_Services.ExecQuery("Select * FROM Win32_Process" & WhereArg, , 48)
+    If WIN_ProcessSet Is Nothing Then Exit Function
+    
+    Dim Process As Object
+    Set GetProcessList = New Collection
+    For Each Process In WIN_ProcessSet
+        GetProcessList.Add Process
+    Next
+    
+    Set Process = Nothing
+    Set WIN_ProcessSet = Nothing
+    Set WIN_Services = Nothing
 End Function
 
 #If Win64 And VBA7 Then
@@ -884,29 +924,29 @@ End Function
 End Function
 
 #If Win64 And VBA7 Then
-    Public Function GetWindow_(hWnd As LongPtr, uCmd As GetWindowCmd) As LongPtr
+    Public Function GetWindow_(hwnd As LongPtr, uCmd As GetWindowCmd) As LongPtr
 #Else
-    Public Function GetWindow_(hWnd As LongPtr, uCmd As GetWindowCmd) As Long
+    Public Function GetWindow_(hwnd As LongPtr, uCmd As GetWindowCmd) As Long
 #End If
-    GetWindow_ = GetWindow(hWnd, uCmd)
+    GetWindow_ = GetWindow(hwnd, uCmd)
 End Function
 
 #If Win64 And VBA7 Then
-    Public Function GetWindowLong_(hWnd As LongPtr, nIndex As GetWindowLongEnum) As LongPtr
-    GetWindowLong_ = GetWindowLongPtr(hWnd, nIndex)
+    Public Function GetWindowLong_(hwnd As LongPtr, nIndex As GetWindowLongEnum) As LongPtr
+    GetWindowLong_ = GetWindowLongPtr(hwnd, nIndex)
 #Else
-    Public Function GetWindowLong_(hWnd As Long, nIndex As GetWindowLongEnum) As Long
-    GetWindowLong_ = GetWindowLong(hWnd, nIndex)
+    Public Function GetWindowLong_(hwnd As Long, nIndex As GetWindowLongEnum) As Long
+    GetWindowLong_ = GetWindowLong(hwnd, nIndex)
 #End If
 End Function
 
 #If Win64 And VBA7 Then
-    Public Function GetWindowRect_(hWnd As LongPtr, lpRect As LongPtr) As Long
+    Public Function GetWindowRect_(hwnd As LongPtr, lpRect As LongPtr) As Long
 #Else
-    Public Function GetWindowRect_(hWnd As Long, lpRect As Long) As Long
+    Public Function GetWindowRect_(hwnd As Long, lpRect As Long) As Long
 #End If
     Dim Output As RECT
-    GetWindowRect_ = GetWindowRect(hWnd, Output)
+    GetWindowRect_ = GetWindowRect(hwnd, Output)
     Call CopyMemory(ByVal lpRect, ByVal VarPtr(Output), LenB(Output))
 End Function
 
@@ -1017,80 +1057,80 @@ Public Function ReleaseCapture_() As Long
 End Function
 
 #If Win64 And VBA7 Then
-    Public Function ReleaseDC_(hWnd As LongPtr, hDC As LongPtr) As Long
+    Public Function ReleaseDC_(hwnd As LongPtr, hDC As LongPtr) As Long
 #Else
-    Public Function ReleaseDC_(hWnd As Long, hDC As Long) As Long
+    Public Function ReleaseDC_(hwnd As Long, hDC As Long) As Long
 #End If
-    ReleaseDC_ = ReleaseDC(hWnd, hDC)
+    ReleaseDC_ = ReleaseDC(hwnd, hDC)
 End Function
 
 #If Win64 And VBA7 Then
-    Public Function SendMessage_(hWnd As LongPtr, wMsg As Long, wParam As Integer, lParam As Long) As Long
+    Public Function SendMessage_(hwnd As LongPtr, wMsg As Long, wParam As Integer, lParam As Long) As Long
 #Else
-    Public Function SendMessage_(hWnd As Long, wMsg As Long, wParam As Integer, lParam As Long) As Long
+    Public Function SendMessage_(hwnd As Long, wMsg As Long, wParam As Integer, lParam As Long) As Long
 #End If
-    SendMessage_ = SendMessage(hWnd, wMsg, wParam, lParam)
+    SendMessage_ = SendMessage(hwnd, wMsg, wParam, lParam)
 End Function
 
-Public Function SetCursorPosition(x As Long, y As Long) As Long
-    SetCursorPosition = SetCursorPos(x, y)
-End Function
-
-#If Win64 And VBA7 Then
-    Public Function SetForegroundWindow_(hWnd As LongPtr) As Long
-#Else
-    Public Function SetForegroundWindow_(hWnd As Long) As Long
-#End If
-    SetForegroundWindow_ = SetForegroundWindow(hWnd)
+Public Function SetCursorPosition(X As Long, Y As Long) As Long
+    SetCursorPosition = SetCursorPos(X, Y)
 End Function
 
 #If Win64 And VBA7 Then
-    Public Function SetLayeredWindowAttributes_(hWnd As LongPtr, crKey As Long, bAlpha As Byte, dwFlags As Long) As Long
+    Public Function SetForegroundWindow_(hwnd As LongPtr) As Long
 #Else
-    Public Function SetLayeredWindowAttributes_(hWnd As Long, crKey As Long, bAlpha As Byte, dwFlags As Long) As Long
+    Public Function SetForegroundWindow_(hwnd As Long) As Long
 #End If
-    SetLayeredWindowAttributes_ = SetLayeredWindowAttributes(hWnd, crKey, bAlpha, dwFlags)
+    SetForegroundWindow_ = SetForegroundWindow(hwnd)
 End Function
 
 #If Win64 And VBA7 Then
-    Public Function SetProp_(ByVal hWnd As LongPtr, ByVal lpString As String, ByVal hData As LongPtr) As Long
+    Public Function SetLayeredWindowAttributes_(hwnd As LongPtr, crKey As Long, bAlpha As Byte, dwFlags As Long) As Long
 #Else
-    Public Function SetProp_(ByVal hWnd As Long, ByVal lpString As String, ByVal hData As Long) As Long
+    Public Function SetLayeredWindowAttributes_(hwnd As Long, crKey As Long, bAlpha As Byte, dwFlags As Long) As Long
 #End If
-    SetProp_ = SetProp(hWnd, lpString, hData)
+    SetLayeredWindowAttributes_ = SetLayeredWindowAttributes(hwnd, crKey, bAlpha, dwFlags)
 End Function
 
 #If Win64 And VBA7 Then
-    Public Function SetWindowLong_(hWnd As LongPtr, nIndex As GetWindowLongEnum, dwNewLong As LongPtr) As LongPtr
-    SetWindowLong_ = SetWindowLongPtr(hWnd, nIndex, dwNewLong)
+    Public Function SetProp_(ByVal hwnd As LongPtr, ByVal lpString As String, ByVal hData As LongPtr) As Long
 #Else
-    Public Function SetWindowLong_(hWnd As Long, nIndex As GetWindowLongEnum, dwNewLong As Long) As Long
-    SetWindowLong_ = SetWindowLong(hWnd, nIndex, dwNewLong)
+    Public Function SetProp_(ByVal hwnd As Long, ByVal lpString As String, ByVal hData As Long) As Long
+#End If
+    SetProp_ = SetProp(hwnd, lpString, hData)
+End Function
+
+#If Win64 And VBA7 Then
+    Public Function SetWindowLong_(hwnd As LongPtr, nIndex As GetWindowLongEnum, dwNewLong As LongPtr) As LongPtr
+    SetWindowLong_ = SetWindowLongPtr(hwnd, nIndex, dwNewLong)
+#Else
+    Public Function SetWindowLong_(hwnd As Long, nIndex As GetWindowLongEnum, dwNewLong As Long) As Long
+    SetWindowLong_ = SetWindowLong(hwnd, nIndex, dwNewLong)
 #End If
 End Function
 
 #If Win64 And VBA7 Then
-    Public Function SetWindowPos_(hWnd As LongPtr, hWndInsertAfter As hWndInsertAfterEnum, x As Long, y As Long, cX As Long, cY As Long, wFlags As SetWindowPositionFlags) As Boolean
+    Public Function SetWindowPos_(hwnd As LongPtr, hWndInsertAfter As hWndInsertAfterEnum, X As Long, Y As Long, cX As Long, cY As Long, wFlags As SetWindowPositionFlags) As Boolean
 #Else
-    Public Function SetWindowPos_(hWnd As Long, hWndInsertAfter As hWndInsertAfterEnum, x As Long, y As Long, cX As Long, cY As Long, wFlags As SetWindowPositionFlags) As Boolean
+    Public Function SetWindowPos_(hwnd As Long, hWndInsertAfter As hWndInsertAfterEnum, X As Long, Y As Long, cX As Long, cY As Long, wFlags As SetWindowPositionFlags) As Boolean
 #End If
-    SetWindowPos_ = SetWindowPos(hWnd, hWndInsertAfter, x, y, cX, cY, wFlags)
+    SetWindowPos_ = SetWindowPos(hwnd, hWndInsertAfter, X, Y, cX, cY, wFlags)
 End Function
 
 #If Win64 And VBA7 Then
-    Public Function SetWindowText_(hWnd As LongPtr, lpString As String) As Long
+    Public Function SetWindowText_(hwnd As LongPtr, lpString As String) As Long
 #Else
-    Public Function SetWindowText_(hWnd As Long, lpString As String) As Long
+    Public Function SetWindowText_(hwnd As Long, lpString As String) As Long
 #End If
-    SetWindowText_ = SetWindowText(hWnd, lpString)
+    SetWindowText_ = SetWindowText(hwnd, lpString)
 End Function
 
 #If Win64 And VBA7 Then
-    Public Function ShowWindow_(hWnd As LongPtr, nCmdShow As ShowWindowFlags) As Long
+    Public Function ShowWindow_(hwnd As LongPtr, nCmdShow As ShowWindowFlags) As Long
 #Else
-    Public Function ShowWindow_(hWnd As Long, nCmdShow As ShowWindowFlags) As Long
+    Public Function ShowWindow_(hwnd As Long, nCmdShow As ShowWindowFlags) As Long
 #End If
-    ShowWindow_ = ShowWindow(hWnd, nCmdShow)
+    ShowWindow_ = ShowWindow(hwnd, nCmdShow)
 End Function
 
 #If Win64 And VBA7 Then
