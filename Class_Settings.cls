@@ -165,6 +165,10 @@ Private Function FileExists(ByVal FilePath As String) As Boolean
     FileExists = CreateObject("Scripting.FileSystemObject").FileExists(FilePath)
 End Function
 
+Private Function FileName(ByVal FilePath As String) As String
+    FileName = CreateObject("Scripting.FileSystemObject").GetFileName(FilePath)
+End Function
+
 Private Function FolderExists(ByVal FilePath As String) As Boolean
     FolderExists = CreateObject("Scripting.FileSystemObject").FolderExists(FilePath)
 End Function
