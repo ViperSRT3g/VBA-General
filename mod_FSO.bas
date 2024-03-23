@@ -66,11 +66,11 @@ Public Function GetFileProperties(ByVal FilePath As String) As Byte
 End Function
 
 Public Function FileExists(ByVal FilePath As String) As Boolean
-    With CreateObject("Scripting.FileSystemObject"): FileExists = .FileExists(FilePath): End With
+    FileExists = CreateObject("Scripting.FileSystemObject").FileExists(FilePath)
 End Function
 
 Public Function FolderExists(ByVal FilePath As String) As Boolean
-    With CreateObject("Scripting.FileSystemObject"): FolderExists = .FolderExists(FilePath): End With
+    FolderExists = CreateObject("Scripting.FileSystemObject").FolderExists(FilePath)
 End Function
 
 Public Function MakeFolder(ByVal Directory As String, ByVal NewFolder As String) As Boolean
@@ -91,69 +91,59 @@ Public Function MakeFolder(ByVal Directory As String, ByVal NewFolder As String)
 End Function
 
 Public Function BuildPath(ByVal Directory As String, ByVal AdditionalPath As String) As String
-    With CreateObject("Scripting.FileSystemObject"): BuildPath = .BuildPath(Directory, AdditionalPath): End With
+    BuildPath = CreateObject("Scripting.FileSystemObject").BuildPath(Directory, AdditionalPath)
 End Function
 
 Public Function CopyFile(ByVal FilePath As String, ByVal FileDestination As String) As Boolean
     With CreateObject("Scripting.FileSystemObject")
-        If .FileExists(FilePath) Then
-            Dim FileObject As Object: Set FileObject = .GetFile(FilePath)
-            FileObject.Copy (FileDestination)
-            CopyFile = .FileExists(FileDestination)
-            Set FileObject = Nothing
-        End If
+        If .FileExists(FilePath) Then Debug.Print .GetFile(FilePath).Copy(FileDestination)
+        CopyFile = .FileExists(FileDestination)
     End With
 End Function
 
 Public Function CopyFolder(ByVal FolderPath As String, ByVal FolderDestination As String) As Boolean
     With CreateObject("Scripting.FileSystemObject")
-        If .FolderExists(FolderPath) Then
-            .CopyFolder FolderPath, FolderDestination
-            CopyFolder = FolderExists(FolderDestination)
-        End If
+        If .FolderExists(FolderPath) Then .CopyFolder FolderPath, FolderDestination
+        CopyFolder = .FolderExists(FolderDestination)
     End With
 End Function
 
 Public Function DeleteTarget(ByVal Path As String) As Boolean
     With CreateObject("Scripting.FileSystemObject")
-        If .FileExists(Path) Then
-            Dim Target As Object: Set Target = .GetFile(Path)
-            Target.Delete
-            DeleteTarget = Not FileExists(Path)
-            Set Target = Nothing
-        End If
+        If .FileExists(Path) Then .GetFile(Path).Delete
+        DeleteTarget = Not .FileExists(Path)
     End With
 End Function
 
 Public Function DriveExists(ByVal DriveLetter As String) As Boolean
-    With CreateObject("Scripting.FileSystemObject"): DriveExists = .DriveExists(DriveLetter): End With
+    DriveExists = CreateObject("Scripting.FileSystemObject").DriveExists(DriveLetter)
 End Function
 
-Public Function AbsolutePath(Optional ByVal Path As String) As String
-    With CreateObject("Scripting.FileSystemObject"): AbsolutePath = .GetAbsolutePathName(Path): End With
+Public Function AbsolutePath(ByVal FilePath As String) As String
+    AbsolutePath = CreateObject("Scripting.FileSystemObject").GetAbsolutePathName(FilePath)
 End Function
 
-Public Function BaseName(ByVal Path As String) As String
-    With CreateObject("Scripting.FileSystemObject"): BaseName = IIf(Len(Path) > 0, .GetBaseName(Path), ""): End With
+Public Function BaseName(ByVal FilePath As String) As String
+    BaseName = CreateObject("Scripting.FileSystemObject").GetBaseName(FilePath)
 End Function
 
-Public Function FileName(ByVal Path As String) As String
-    With CreateObject("Scripting.FileSystemObject"): FileName = .GetFileName(Path): End With
+Public Function FileName(ByVal FilePath As String) As String
+    FileName = CreateObject("Scripting.FileSystemObject").GetFileName(FilePath)
 End Function
 
-Public Function FileExt(ByVal Path As String) As String
-    With CreateObject("Scripting.FileSystemObject"): FileExt = .GetExtensionName(Path): End With
+Public Function FileExt(ByVal FilePath As String) As String
+    FileExt = CreateObject("Scripting.FileSystemObject").GetExtensionName(FilePath)
 End Function
 
 Public Function ParentFolder(ByVal FilePath As String) As String
     ParentFolder = Left(FilePath, InStrRev(Left(FilePath, Len(FilePath) - 1), "\"))
 End Function
 
-Public Function RenameFile(ByVal OldName As String, ByVal NewName As String) As Boolean
+Public Function RenameFile(ByVal FilePath As String, ByVal NewName As String) As Boolean
     With CreateObject("Scripting.FileSystemObject")
-        If Not .FileExists(OldName) Then Exit Function
-        .MoveFile OldName, NewName
-        RenameFile = .FileExists(NewName)
+        If Not .FileExists(FilePath) Then Exit Function
+        .GetFile(FilePath).Name = NewName
+        RenameFile = .FileExists(Replace(FilePath, .GetFileName(FilePath), NewName))
     End With
 End Function
 
