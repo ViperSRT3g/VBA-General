@@ -79,7 +79,7 @@ Public Function AddProperty(PropName As String, DataTypeName As DataTypeEnum) As
 End Function
 
 'Returns a STRING containing the entire Class Module code generated from the given Class_Builder_Property objects
-Public Function GenClass() As String
+Public Function GenClass(Optional SingleLine As Boolean = True, Optional GetOnly As Boolean, Optional LetSetOnly As Boolean) As String
     Dim Output  As String
     
     'Header Attributes and Flags of the Class Module
@@ -90,7 +90,7 @@ Public Function GenClass() As String
     Output = Output & Join(Array(SECT_PUC, SECT_PRC, SECT_PRD, SECT_PUV), VBA.vbCrLf & VBA.vbCrLf & VBA.vbCrLf) & VBA.vbCrLf
     Output = Output & Join(Array(VAR_PROP, SECT_PRV, SECT_PROC), VBA.vbCrLf & VBA.vbCrLf & VBA.vbCrLf) & VBA.vbCrLf
     Output = Output & Join(Array(CPROC_INIT1, CPROC_INIT2, GenInitSection, CPROC_SEND, CPROC_TERM1, CPROC_TERM2, CPROC_TERM3, CPROC_SEND), VBA.vbCrLf) & VBA.vbCrLf & VBA.vbCrLf & VBA.vbCrLf
-    Output = Output & SECT_PROP & VBA.vbCrLf & GenPropSection & VBA.vbCrLf & VBA.vbCrLf & VBA.vbCrLf
+    Output = Output & SECT_PROP & VBA.vbCrLf & GenPropSection(SingleLine, GetOnly, LetSetOnly) & VBA.vbCrLf & VBA.vbCrLf & VBA.vbCrLf
     Output = Output & Join(Array(SECT_PUF & VBA.vbCrLf & GenLoadData, SECT_PRF & VBA.vbCrLf & GenPFunction), VBA.vbCrLf & VBA.vbCrLf & VBA.vbCrLf) & VBA.vbCrLf
     GenClass = Output
 End Function
