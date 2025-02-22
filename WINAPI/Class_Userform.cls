@@ -144,44 +144,44 @@ Private WithEvents UForm As MSForms.UserForm    'Userform Events Object
 Attribute UForm.VB_VarHelpID = -1
 
 #If Win64 And VBA7 Then
-    Private Handle As LongPtr   'LongPtr Handle of the Userform
-    Private BHandle As LongPtr  'LongPtr Handle of the WebBrowser (Gif Icon)
-    Private WStyle As LongPtr   'LongPtr Window style flag variable
-    Private EXStyle As LongPtr  'LongPtr Extended window style flag variable
+    Private Handle      As LongPtr  'LongPtr Handle of the Userform
+    Private BHandle     As LongPtr  'LongPtr Handle of the WebBrowser (Gif Icon)
+    Private WStyle      As LongPtr  'LongPtr Window style flag variable
+    Private EXStyle     As LongPtr  'LongPtr Extended window style flag variable
 #Else
-    Private Handle As Long      'Long Handle of the Userform
-    Private BHandle As Long     'Long Handle of the WebBrowser (Gif Icon)
-    Private WStyle As Long      'Long Window style flag variable
-    Private EXStyle As Long     'Long Extended window style flag variable
+    Private Handle      As Long     'Long Handle of the Userform
+    Private BHandle     As Long     'Long Handle of the WebBrowser (Gif Icon)
+    Private WStyle      As Long     'Long Window style flag variable
+    Private EXStyle     As Long     'Long Extended window style flag variable
 #End If
 
-Private Form As Object          'Userform Event Action Object
-Private Browser As Object       'WebBrowser Object (Gif Icon)
-Private lShiftLeftPix As Long   'WebBrowser X Offset (Gif Icon)
-Private lShiftTopPix As Long    'WebBrowser Y Offset (Gif Icon)
-Private IconHandle As Long      'Long Handle of the Userform Icon
-Private Transparency As Long    'Userform's Transparency setting
-Private Translucency As Byte    'Userform's Translucency setting
-Private BlankIconPath As String 'Filepath of a given icon file
+Private Form_           As Object   'Userform Event Action Object
+Private Browser         As Object   'WebBrowser Object (Gif Icon)
+Private lShiftLeftPix   As Long     'WebBrowser X Offset (Gif Icon)
+Private lShiftTopPix    As Long     'WebBrowser Y Offset (Gif Icon)
+Private IconHandle      As Long     'Long Handle of the Userform Icon
+Private Transparency    As Long     'Userform's Transparency setting
+Private Translucency    As Byte     'Userform's Translucency setting
+Private BlankIconPath   As String   'Filepath of a given icon file
 
 'Property flags
-Private IconEnabled_ As Boolean
-Private WindowBorder_ As Boolean
-Private WindowCaption_ As Boolean
-Private WindowEdge_ As Boolean
-Private MaximizeBox_ As Boolean
-Private MinimizeBox_ As Boolean
-Private Resizable_ As Boolean
-Private SystemMenu_ As Boolean
-Private Taskbar_ As Boolean
-Private TopMost_ As Boolean
-Private TooltipWindow_ As Boolean
-Private Draggable_ As Boolean
+Private IconEnabled_    As Boolean
+Private Draggable_      As Boolean
 
 
 'CLASS PROPERTIES
-Public Property Get IconEnabled() As Boolean
-    HasIcon = IconEnabled_
+Public Property Get Draggable() As Boolean
+    Draggable = Draggable_
+End Property
+Public Property Let Draggable(Value As Boolean)
+    Draggable_ = Value
+End Property
+
+Public Property Get Form() As Object
+    Set Form = Form_
+End Property
+Public Property Set Form(Target As Object)
+    Call SetUserform(Target)
 End Property
 
 #If Win64 And VBA7 Then
@@ -192,102 +192,89 @@ End Property
     hwnd = Handle
 End Property
 
-Public Property Get WindowBorder() As Boolean
-    WindowBorder = WindowBorder_
-End Property
-Public Property Let WindowBorder(Value As Boolean)
-    WindowBorder_ = Value
-    If WindowBorder_ Then Call AddWindowStyle(WS_BORDER)
-    If Not WindowBorder_ Then Call RemoveWindowStyle(WS_BORDER)
-End Property
-
-Public Property Get WindowCaption() As Boolean
-    WindowCaption = WindowCaption_
-End Property
-Public Property Let WindowCaption(Value As Boolean)
-    WindowCaption_ = Value
-    If WindowCaption_ Then Call AddWindowStyle(WS_CAPTION)
-    If Not WindowCaption_ Then Call RemoveWindowStyle(WS_CAPTION)
-End Property
-
-Public Property Get WindowEdge() As Boolean
-    WindowEdge = WindowEdge_
-End Property
-Public Property Let WindowEdge(Value As Boolean)
-    WindowEdge_ = Value
-    If WindowEdge_ Then Call AddExtWindowStyle(WS_EX_WINDOWEDGE)
-    If Not WindowEdge_ Then Call RemoveExtWindowStyle(WS_EX_WINDOWEDGE)
+Public Property Get IconEnabled() As Boolean
+    IconEnabled = IconEnabled_
 End Property
 
 Public Property Get MaximizeBox() As Boolean
-    MaximizeBox = MaximizeBox_
+    MaximizeBox = (WStyle And WS_MAXIMIZEBOX) = WS_MAXIMIZEBOX
 End Property
 Public Property Let MaximizeBox(Value As Boolean)
-    MaximizeBox_ = Value
-    If MaximizeBox_ Then Call AddWindowStyle(WS_MAXIMIZEBOX)
-    If Not MaximizeBox_ Then Call RemoveWindowStyle(WS_MAXIMIZEBOX)
+    If Value Then Call AddWindowStyle(WS_MAXIMIZEBOX)
+    If Not Value Then Call RemoveWindowStyle(WS_MAXIMIZEBOX)
 End Property
 
 Public Property Get MinimizeBox() As Boolean
-    MinimizeBox = MinimizeBox_
+    MinimizeBox = (WStyle And WS_MINIMIZEBOX) = WS_MINIMIZEBOX
 End Property
 Public Property Let MinimizeBox(Value As Boolean)
-    MinimizeBox_ = Value
-    If MinimizeBox_ Then Call AddWindowStyle(WS_MINIMIZEBOX)
-    If Not MinimizeBox_ Then Call RemoveWindowStyle(WS_MINIMIZEBOX)
+    If Value Then Call AddWindowStyle(WS_MINIMIZEBOX)
+    If Not Value Then Call RemoveWindowStyle(WS_MINIMIZEBOX)
 End Property
 
 Public Property Get Resizable() As Boolean
-    Resizable = Resizable_
+    Resizable = (WStyle And WS_SIZEBOX) = WS_SIZEBOX
 End Property
 Public Property Let Resizable(Value As Boolean)
-    Resizable_ = Value
-    If Resizable_ Then Call AddWindowStyle(WS_SIZEBOX)
-    If Not Resizable_ Then Call RemoveWindowStyle(WS_SIZEBOX)
+    If Value Then Call AddWindowStyle(WS_SIZEBOX)
+    If Not Value Then Call RemoveWindowStyle(WS_SIZEBOX)
 End Property
 
 Public Property Get SystemMenu() As Boolean
-    SystemMenu = SystemMenu_
+    SystemMenu = (WStyle And WS_SYSMENU) = WS_SYSMENU
 End Property
 Public Property Let SystemMenu(Value As Boolean)
-    SystemMenu_ = Value
-    If SystemMenu_ Then Call AddWindowStyle(WS_SYSMENU)
-    If Not SystemMenu_ Then Call RemoveWindowStyle(WS_SYSMENU)
+    If Value Then Call AddWindowStyle(WS_SYSMENU)
+    If Not Value Then Call RemoveWindowStyle(WS_SYSMENU)
 End Property
 
 Public Property Get Taskbar() As Boolean
-    Taskbar = Taskbar_
+    Taskbar = (EXStyle And WS_EX_APPWINDOW) = WS_EX_APPWINDOW
 End Property
 Public Property Let Taskbar(Value As Boolean)
-    Taskbar_ = Value
-    If Taskbar_ Then Call AddExtWindowStyle(WS_EX_APPWINDOW)
-    If Not Taskbar_ Then Call RemoveExtWindowStyle(WS_EX_APPWINDOW)
+    If Value Then Call AddExtWindowStyle(WS_EX_APPWINDOW)
+    If Not Value Then Call RemoveExtWindowStyle(WS_EX_APPWINDOW)
     'Reset the TopMost state due to WS_EX_APPWINDOW adversely affecting it
-    Call WINAPI.SetWindowPos_(Handle, IIf(TopMost_, HWND_TOPMOST, HWND_NOTOPMOST), 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE)
+    Call WINAPI.SetWindowPos_(Handle, IIf(Me.TopMost, HWND_TOPMOST, HWND_NOTOPMOST), 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE)
 End Property
 
 Public Property Get TopMost() As Boolean
-    TopMost = TopMost_
+    TopMost = (EXStyle And WS_EX_TOPMOST) = WS_EX_TOPMOST
 End Property
 Public Property Let TopMost(Value As Boolean)
-    TopMost_ = Value
-    Call WINAPI.SetWindowPos_(Handle, IIf(TopMost_, HWND_TOPMOST, HWND_NOTOPMOST), 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE)
+    Call WINAPI.SetWindowPos_(Handle, IIf(Value, HWND_TOPMOST, HWND_NOTOPMOST), 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE)
 End Property
 
 Public Property Get TooltipWindow() As Boolean
-    TooltipWindow = TooltipWindow_
+    TooltipWindow = (EXStyle And WS_EX_TOOLWINDOW) = WS_EX_TOOLWINDOW
 End Property
 Public Property Let TooltipWindow(Value As Boolean)
-    TooltipWindow_ = Value
-    If TooltipWindow_ Then Call AddExtWindowStyle(WS_EX_TOOLWINDOW)
-    If Not TooltipWindow_ Then Call RemoveExtWindowStyle(WS_EX_TOOLWINDOW)
+    If Value Then Call AddExtWindowStyle(WS_EX_TOOLWINDOW)
+    If Not Value Then Call RemoveExtWindowStyle(WS_EX_TOOLWINDOW)
 End Property
 
-Public Property Get Draggable() As Boolean
-    Draggable = Draggable_
+Public Property Get WindowBorder() As Boolean
+    WindowBorder = (WStyle And WS_BORDER) = WS_BORDER
 End Property
-Public Property Let Draggable(Value As Boolean)
-    Draggable_ = Value
+Public Property Let WindowBorder(Value As Boolean)
+    If Value Then Call AddWindowStyle(WS_BORDER)
+    If Not Value Then Call RemoveWindowStyle(WS_BORDER)
+End Property
+
+Public Property Get WindowCaption() As Boolean
+    WindowCaption = (WStyle And WS_CAPTION) = WS_CAPTION
+End Property
+Public Property Let WindowCaption(Value As Boolean)
+    If Value Then Call AddWindowStyle(WS_CAPTION)
+    If Not Value Then Call RemoveWindowStyle(WS_CAPTION)
+End Property
+
+Public Property Get WindowEdge() As Boolean
+    WindowEdge = (EXStyle And WS_EX_WINDOWEDGE) = WS_EX_WINDOWEDGE
+End Property
+Public Property Let WindowEdge(Value As Boolean)
+    If Value Then Call AddExtWindowStyle(WS_EX_WINDOWEDGE)
+    If Not Value Then Call RemoveExtWindowStyle(WS_EX_WINDOWEDGE)
 End Property
 
 
@@ -307,10 +294,6 @@ End Sub
 Private Sub UForm_Layout()
     Call UpdateIcon
 End Sub
-Public Sub RefreshIcon(Toggle As Boolean)
-    If Not Toggle Then Exit Sub
-    Call UpdateIcon
-End Sub
 Private Sub UForm_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
     Const WM_NCLBUTTONDOWN = &HA1
     Const HTCAPTION = 2
@@ -322,31 +305,6 @@ End Sub
 
 
 'PUBLIC SUB/FUNCTIONS
-'Sets the given userform as the target for this class
-Public Function SetUserform(TargetUserform As Object) As Boolean
-    If TargetUserform Is Nothing Then Exit Function
-    Set UForm = TargetUserform 'Set Event Listener
-    Set Form = TargetUserform
-    Handle = WINAPI.GetUFHandle(TargetUserform) 'Get Form Handle
-    
-    'Load Window Styling
-    WStyle = WINAPI.GetWindowLong_(Handle, GWL_STYLE)
-    EXStyle = WINAPI.GetWindowLong_(Handle, GWL_EXSTYLE)
-    
-    'Apply Window Style bit flags to class properties
-    WindowBorder_ = (WStyle And WS_BORDER) = WS_BORDER
-    WindowCaption_ = (WStyle And WS_CAPTION) = WS_CAPTION
-    MaximizeBox_ = (WStyle And WS_MAXIMIZEBOX) = WS_MAXIMIZEBOX
-    MinimizeBox_ = (WStyle And WS_MINIMIZEBOX) = WS_MINIMIZEBOX
-    Resizable_ = (WStyle And WS_SIZEBOX) = WS_SIZEBOX
-    SystemMenu_ = (WStyle And WS_SYSMENU) = WS_SYSMENU
-    Taskbar_ = (EXStyle And WS_EX_APPWINDOW) = WS_EX_APPWINDOW
-    TopMost_ = (EXStyle And WS_EX_TOPMOST) = WS_EX_TOPMOST
-    TooltipWindow_ = (EXStyle And WS_EX_TOOLWINDOW) = WS_EX_TOOLWINDOW
-    
-    SetUserform = (Not Handle = 0)
-End Function
-
 'Adds window styles to the userform
 Public Function AddWindowStyle(WindowStyle As WindowStyleFlags) As Boolean
     If Handle = 0 Then Exit Function
@@ -480,18 +438,18 @@ Private Function CreateBrowser() As Boolean
         'This function initializes ATL's control hosting code by registering the "AtlAxWin80" and "AtlAxWinLic80" window classes
         'plus a couple of custom window messages.
         Call WINAPI.AtlAxWinInit_
-        'CreateWindowEx - Creates an overlapped, pop-up, or child window with an extended window style; This function is identical to the CreateWindow function.
-        'GetModuleHandle - Retrieves a module handle for the specified module. The module must have been loaded by the calling process.
+        'CreateWindowEx     Creates an overlapped, pop-up, or child window with an extended window style; This function is identical to the CreateWindow function.
+        'GetModuleHandle    Retrieves a module handle for the specified module. The module must have been loaded by the calling process.
         BHandle = WINAPI.CreateWindowEx_(0, "AtlAxWin", "about:blank", WS_POPUP Or WS_VISIBLE Or WS_DISABLED, 0, 0, 0, 0, 0, 0, WINAPI.GetModuleHandle_(vbNullString), VarPtr(0))
         If BHandle Then
             Call WINAPI.SetWindowLong_(BHandle, GWL_HWNDPARENT, Handle) 'Sets Handle as the Parent handle for BHandle
-            'SetWindowPos_ - Set newly created Browser to temporarily be the topmost window
-            'SetWindowLong_ - Set Extended window style properties to reflect the topmost z-order
-            'SetWindowPos_ - Remove topmost z-order in case the userform is meant to be the topmost window
+            'SetWindowPos_  Set newly created Browser to temporarily be the topmost window
+            'SetWindowLong_ Set Extended window style properties to reflect the topmost z-order
+            'SetWindowPos_  Remove topmost z-order in case the userform is meant to be the topmost window
             Call WINAPI.SetWindowPos_(BHandle, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE)
             Call WINAPI.SetWindowLong_(BHandle, GWL_EXSTYLE, WINAPI.GetWindowLong_(BHandle, GWL_EXSTYLE) Or WS_EX_COMPOSITED Or WS_EX_LAYERED Or WS_EX_TRANSPARENT Or WS_EX_TOPMOST)
             Call WINAPI.SetWindowPos_(BHandle, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE)
-            Call WINAPI.SetWindowPos_(Handle, IIf(TopMost_, HWND_TOPMOST, HWND_NOTOPMOST), 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE)
+            Call WINAPI.SetWindowPos_(Handle, IIf(Me.TopMost, HWND_TOPMOST, HWND_NOTOPMOST), 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE)
             'Adds a new entry or changes an existing entry in the property list of the specified window.
             'Sets BHandle as a new property of Handle with name "BHandle"
             Call WINAPI.SetProp_(Handle, "BHandle", BHandle)
@@ -517,6 +475,28 @@ Private Function GetRGB() As String
     Call WINAPI.ColorRGBToHLS_(Color, Hue, Luminance, Saturation)
     Color = WINAPI.ColorHLSToRGB_(Hue, Luminance, Saturation)
     GetRGB = "#" & Right("0" & Hex(&HFF& And Color), 2) & Right("0" & Hex((&HFF00& And Color) \ 256), 2) & Right("0" & Hex((&HFF0000 And Color) \ 65536), 2)
+End Function
+
+'Sets the given userform as the target for this class
+Private Function SetUserform(TargetUserform As Object) As Boolean
+    Set UForm = TargetUserform 'Set Event Listener
+    Set Form_ = TargetUserform
+    
+    If TargetUserform Is Nothing Then
+        Handle = 0
+        WStyle = 0
+        EXStyle = 0
+        Exit Function
+    End If
+    
+    'Get Form Handle
+    Handle = WINAPI.GetUFHandle(Form_)
+    
+    'Load Window Styling
+    WStyle = WINAPI.GetWindowLong_(Handle, GWL_STYLE)
+    EXStyle = WINAPI.GetWindowLong_(Handle, GWL_EXSTYLE)
+    
+    SetUserform = (Not Handle = 0)
 End Function
 
 'Updates the position and background color of the browser window for the gif icon
